@@ -16,6 +16,7 @@ suite("VSCodeConfig", () => {
     "path.oxfmt",
     "path.tsgolint",
     "path.node",
+    "suppressProgramErrors",
   ];
   setup(async () => {
     await Promise.all(keys.map((key) => conf.update(key, undefined)));
@@ -36,6 +37,11 @@ suite("VSCodeConfig", () => {
     strictEqual(config.binPathOxfmt, "");
     strictEqual(config.binPathTsGoLint, "");
     strictEqual(config.nodePath, "");
+    strictEqual(
+      config.suppressProgramErrors,
+      false,
+      "suppressProgramErrors should default to false",
+    );
   });
 
   test("deprecated values are respected", async () => {
@@ -74,6 +80,7 @@ suite("VSCodeConfig", () => {
       config.updateBinPathOxfmt("./formatter"),
       config.updateBinPathTsGoLint("./tsgolint"),
       config.updateNodePath("./node"),
+      config.updateSuppressTsconfigErrors(true),
     ]);
 
     const wsConfig = workspace.getConfiguration("oxc");
@@ -86,5 +93,6 @@ suite("VSCodeConfig", () => {
     strictEqual(wsConfig.get("path.oxfmt"), "./formatter");
     strictEqual(wsConfig.get("path.tsgolint"), "./tsgolint");
     strictEqual(wsConfig.get("path.node"), "./node");
+    strictEqual(wsConfig.get("suppressProgramErrors"), true);
   });
 });
