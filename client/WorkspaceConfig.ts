@@ -16,7 +16,9 @@ export enum FixKind {
 }
 
 /**
- * See `"contributes.configuration"` in `package.json`
+ * This interface defines the configuration sent between the VS Code extension and the LSP.
+ * Extension configuration is handled by `VSCodeConfig`.
+ * All `null` values should be converted to `undefined` when sending to the LSP, to avoid confusion between "not set" and "set to null".
  */
 interface WorkspaceConfigInterface {
   /**
@@ -26,7 +28,7 @@ interface WorkspaceConfigInterface {
    *
    * @default null
    */
-  configPath: string | null;
+  configPath?: string | null;
   /**
    * typescript config path
    *
@@ -34,14 +36,14 @@ interface WorkspaceConfigInterface {
    *
    * @default null
    */
-  tsConfigPath: string | null;
+  tsConfigPath?: string | null;
   /**
    * When to run the linter and generate diagnostics
    * `oxc.lint.run`
    *
    * @default 'onType'
    */
-  run: DiagnosticPullMode;
+  run?: DiagnosticPullMode;
 
   /**
    * Define how directive comments like `// oxlint-disable-line` should be reported,
@@ -51,30 +53,30 @@ interface WorkspaceConfigInterface {
    *
    * @default 'allow'
    */
-  unusedDisableDirectives: UnusedDisableDirectives;
+  unusedDisableDirectives?: UnusedDisableDirectives;
 
   /**
-   * Whether to enable type-aware linting
+   * Whether to enable type-aware linting. Boolean or null (from configuration file).
    *
    * `oxc.typeAware`
    *
-   * @default false
+   * @default null
    */
-  typeAware: boolean;
+  typeAware?: boolean | null;
 
   /**
    * Disable nested config files detection
    * `oxc.disableNestedConfig`
    * @default false
    */
-  disableNestedConfig: boolean;
+  disableNestedConfig?: boolean;
 
   /**
    * Fix kind to use when applying fixes
    * `oxc.fixKind`
    * @default 'safe_fix'
    */
-  fixKind: FixKind;
+  fixKind?: FixKind;
 
   /**
    * Additional flags to pass to the LSP binary
@@ -82,7 +84,7 @@ interface WorkspaceConfigInterface {
    *
    * @default {}
    */
-  flags: Record<string, string>;
+  flags?: Record<string, string>;
 
   /**
    * Path to an oxfmt configuration file
@@ -100,7 +102,7 @@ export class WorkspaceConfig {
   private _tsConfigPath: string | null = null;
   private _runTrigger: DiagnosticPullMode = DiagnosticPullMode.onType;
   private _unusedDisableDirectives: UnusedDisableDirectives = "allow";
-  private _typeAware: boolean = false;
+  private _typeAware: boolean | null = null;
   private _disableNestedConfig: boolean = false;
   private _fixKind: FixKind = FixKind.SafeFix;
   private _formattingConfigPath: string | null = null;
@@ -139,7 +141,7 @@ export class WorkspaceConfig {
     this._tsConfigPath = this.configuration.get<string | null>("tsConfigPath") ?? null;
     this._unusedDisableDirectives =
       this.configuration.get<UnusedDisableDirectives>("unusedDisableDirectives") ?? "allow";
-    this._typeAware = this.configuration.get<boolean>("typeAware") ?? false;
+    this._typeAware = this.configuration.get<boolean | null>("typeAware") ?? null;
     this._disableNestedConfig = disableNestedConfig ?? false;
     this._fixKind = fixKind ?? FixKind.SafeFix;
     this._formattingConfigPath = this.configuration.get<string | null>("fmt.configPath") ?? null;
@@ -228,11 +230,11 @@ export class WorkspaceConfig {
     );
   }
 
-  get typeAware(): boolean {
+  get typeAware(): boolean | null {
     return this._typeAware;
   }
 
-  updateTypeAware(value: boolean): PromiseLike<void> {
+  updateTypeAware(value: boolean | null): PromiseLike<void> {
     this._typeAware = value;
     return this.configuration.update("typeAware", value, ConfigurationTarget.WorkspaceFolder);
   }
@@ -274,10 +276,10 @@ export class WorkspaceConfig {
 
   public toOxlintConfig(): OxlintWorkspaceConfigInterface {
     return {
-      configPath: this.configPath ?? null,
-      tsConfigPath: this.tsConfigPath ?? null,
+      configPath: this.configPath ?? undefined,
+      tsConfigPath: this.tsConfigPath ?? undefined,
       unusedDisableDirectives: this.unusedDisableDirectives,
-      typeAware: this.typeAware,
+      typeAware: this.typeAware ?? undefined,
       disableNestedConfig: this.disableNestedConfig,
       fixKind: this.fixKind,
       // keep for backward compatibility
@@ -294,7 +296,7 @@ export class WorkspaceConfig {
     return {
       // @ts-expect-error -- deprecated setting, kept for backward compatibility
       ["fmt.experimental"]: true,
-      ["fmt.configPath"]: this.formattingConfigPath ?? null,
+      ["fmt.configPath"]: this.formattingConfigPath ?? undefined,
     };
   }
 }
