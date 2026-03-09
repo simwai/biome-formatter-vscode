@@ -30,6 +30,8 @@ export default class FormatterTool implements ToolInterface {
   // LSP client instance
   private client: LanguageClient | undefined;
 
+  private disposeResources: (() => Promise<void>) | undefined;
+
   async getBinary(
     outputChannel: LogOutputChannel,
     configService: ConfigService,
@@ -337,7 +339,12 @@ export default class FormatterTool implements ToolInterface {
       },
     );
 
-    context.subscriptions.push(restartCommand, toggleEnable, onNotificationDispose);
+    this.disposeResources = async () => {
+      await this.client?.dispose();
+      restartCommand.dispose();
+      toggleEnable.dispose();
+      onNotificationDispose.dispose();
+    };
 
     if (configService.vsCodeConfig.enableOxfmt) {
       await this.client.start();
@@ -348,10 +355,11 @@ export default class FormatterTool implements ToolInterface {
 
   async deactivate(): Promise<void> {
     if (!this.client) {
-      return undefined;
+      return;
     }
     await this.client.stop();
-    await this.client.dispose();
+    await this.disposeResources?.();
+    this.disposeResources = undefined;
     this.client = undefined;
   }
 
