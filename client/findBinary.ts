@@ -108,6 +108,81 @@ export async function searchProjectNodeModulesBin(binaryName: string): Promise<s
   return searchNodeModulesDefaultBinPath(binaryName, packageJsonNodeModules);
 }
 
+interface PnpApi {
+  resolveRequest(request: string, issuer: string): string | null;
+}
+
+function isPnpApi(value: unknown): value is PnpApi {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "resolveRequest" in value &&
+    typeof (value as Record<string, unknown>).resolveRequest === "function"
+  );
+}
+
+/**
+ * Walk up from startDir to find and load a Yarn PnP API (.pnp.cjs or .pnp.js).
+ * Returns the PnP API object and the absolute path to the loader file.
+ *
+ * SECURITY: This function executes JavaScript via require().
+ * Callers MUST verify workspace.isTrusted before invoking.
+ */
+function findPnpApi(startDir: string): { api: PnpApi; loaderPath: string } | undefined {
+  let dir = startDir;
+  while (dir !== path.dirname(dir)) {
+    for (const name of [".pnp.cjs", ".pnp.js"]) {
+      try {
+        const pnpFilePath = path.join(dir, name);
+        const loaded: unknown = require(pnpFilePath);
+        if (isPnpApi(loaded)) {
+          return { api: loaded, loaderPath: pnpFilePath };
+        }
+      } catch {
+        // file doesn't exist or failed to load, try next
+      }
+    }
+    dir = path.dirname(dir);
+  }
+  return undefined;
+}
+
+export interface PnpBinResult {
+  binPath: string;
+  pnpLoaderPath: string;
+}
+
+/**
+ * Search for the binary using Yarn PnP resolution.
+ * Loads .pnp.cjs/.pnp.js from the workspace (searching upward for monorepo support)
+ * and uses pnpapi.resolveRequest() to locate the package.
+ * Returns both the binary path and the PnP loader path (needed for --require injection).
+ */
+export async function searchYarnPnpBin(binaryName: string): Promise<PnpBinResult | undefined> {
+  if (!workspace.isTrusted) {
+    return undefined;
+  }
+
+  const results = await Promise.all(
+    (workspace.workspaceFolders ?? []).map(async (folder) => {
+      const folderPath = folder.uri.fsPath;
+      const pnpResult = findPnpApi(folderPath);
+      if (!pnpResult) return undefined;
+      try {
+        const resolvedMain = pnpResult.api.resolveRequest(binaryName, folderPath + path.sep);
+        if (!resolvedMain) return undefined;
+        const binPath = replaceTargetFromMainToBin(resolvedMain, binaryName);
+        await workspace.fs.stat(Uri.file(binPath));
+        return { binPath, pnpLoaderPath: pnpResult.loaderPath } satisfies PnpBinResult;
+      } catch {
+        return undefined;
+      }
+    }),
+  );
+
+  return results.find((r): r is PnpBinResult => r !== undefined);
+}
+
 /**
  * Search for the binary in global node_modules.
  * Returns undefined if not found.

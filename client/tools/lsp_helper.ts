@@ -9,6 +9,7 @@ export function runExecutable(
   nodePath?: string,
   tsgolintPath?: string,
   suppressProgramErrors?: boolean,
+  pnpLoaderPath?: string,
 ): Executable {
   const serverEnv: Record<string, string> = {
     ...process.env,
@@ -48,10 +49,21 @@ export function runExecutable(
 
   const isWindows = process.platform === "win32";
 
+  // In Yarn PnP environments, inject the PnP loaders so that both CJS require()
+  // and ESM import calls can resolve dependencies through PnP.
+  // --require .pnp.cjs: patches CJS resolution (e.g., oxlint's NAPI-RS bindings via createRequire)
+  // --loader .pnp.loader.mjs: patches ESM resolution (e.g., oxfmt's tinypool import)
+  const pnpArgs: string[] = [];
+  if (pnpLoaderPath) {
+    pnpArgs.push("--require", pnpLoaderPath);
+    const esmLoaderPath = path.join(path.dirname(pnpLoaderPath), ".pnp.loader.mjs");
+    pnpArgs.push("--loader", esmLoaderPath);
+  }
+
   return isNode || useExecPath
     ? {
         command: nodeCommand,
-        args: [binaryPath, "--lsp"],
+        args: [...pnpArgs, binaryPath, "--lsp"],
         options: {
           env: serverEnv,
         },
