@@ -1,6 +1,6 @@
 import { commands, ExtensionContext, LogOutputChannel, window, workspace } from "vscode";
 
-import { OxcCommands } from "./commands";
+import { copyDebugCommand, OxcCommands } from "./commands";
 import { ConfigService } from "./ConfigService";
 import StatusBarItemHandler from "./StatusBarItemHandler";
 import Formatter from "./tools/formatter";
@@ -28,12 +28,23 @@ export async function activate(context: ExtensionContext) {
     log: true,
   });
 
+  const statusBarItemHandler = new StatusBarItemHandler(context.extension.packageJSON?.version);
+
   const showOutputLintCommand = commands.registerCommand(OxcCommands.ShowOutputChannelLint, () => {
     outputChannelLint.show();
   });
 
   const showOutputFmtCommand = commands.registerCommand(OxcCommands.ShowOutputChannelFmt, () => {
     outputChannelFormat.show();
+  });
+
+  const copyDebugInfoCommand = commands.registerCommand(OxcCommands.CopyDebugInfo, async () => {
+    await copyDebugCommand(
+      context.extension.packageJSON?.version ?? "unknown",
+      tools.find((tool) => tool instanceof Linter)?.getLspVersion() ?? "unknown",
+      tools.find((tool) => tool instanceof Formatter)?.getLspVersion() ?? "unknown",
+      configService.vsCodeConfig,
+    );
   });
 
   const onDidChangeWorkspaceFoldersDispose = workspace.onDidChangeWorkspaceFolders(
@@ -47,11 +58,10 @@ export async function activate(context: ExtensionContext) {
     },
   );
 
-  const statusBarItemHandler = new StatusBarItemHandler(context.extension.packageJSON?.version);
-
   context.subscriptions.push(
     showOutputLintCommand,
     showOutputFmtCommand,
+    copyDebugInfoCommand,
     configService,
     outputChannelLint,
     outputChannelFormat,

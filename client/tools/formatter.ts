@@ -269,6 +269,10 @@ export default class FormatterTool implements ToolInterface {
 
   private disposeResources: (() => Promise<void>) | undefined;
 
+  getLspVersion(): string | undefined {
+    return this.client?.initializeResult?.serverInfo?.version;
+  }
+
   async getBinary(
     outputChannel: LogOutputChannel,
     configService: ConfigService,
