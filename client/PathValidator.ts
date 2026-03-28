@@ -4,11 +4,11 @@
  * Following checks are performed:
  * Check for path traversal (e.g., using `..` to go up directories).
  * Check for malicious characters or patterns (e.g., `$`, `&`, `;`, `|`).
- * Check if the filename contains `biome_language_server` to ensure it's the expected binary.
+ * Check if the filename contains `biome` to ensure it's the expected binary.
  *
  * The check for malicious characters is not needed, but it's an additional layer of security.
  * When using `shell: true` in `LanguageClient.ServerOptions`, it can be vulnerable to command injection.
- * We are using `shell: true` only on Windows when the paths ends with `node_modules/.bin/biome_language_server`.
+ * We are using `shell: true` only on Windows when the paths ends with `node_modules/.bin/biome`.
  */
 export function validateSafeBinaryPath(binary: string): boolean {
   // Check for path traversal (including Windows variants)

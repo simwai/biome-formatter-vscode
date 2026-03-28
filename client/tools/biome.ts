@@ -119,7 +119,7 @@ export default class BiomeTool implements ToolInterface {
         workspace: {
           configuration: (params: ConfigurationParams) => {
             return params.items.map((item) => {
-              if (item.section !== "biome_language_server") {
+              if (item.section !== "biome") {
                 return null;
               }
               if (item.scopeUri === undefined) {

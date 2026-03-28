@@ -13,7 +13,7 @@ export function runExecutable(
   const serverEnv: Record<string, string> = {
     ...process.env,
     RUST_LOG: process.env.RUST_LOG || "info", // Keep for backward compatibility for a while
-    OXC_LOG: process.env.OXC_LOG || "info",
+    BIOME_LOG: process.env.BIOME_LOG || "info",
     NO_COLOR: "1",
   };
   if (tsgolintPath) {
@@ -58,7 +58,7 @@ export function runExecutable(
   return isNode || useExecPath
     ? {
         command: nodeCommand,
-        args: [...pnpArgs, binary.path, "--lsp"],
+        args: [...pnpArgs, binary.path, "lsp-proxy"],
         options: {
           env: serverEnv,
         },
@@ -66,7 +66,7 @@ export function runExecutable(
     : {
         // On Windows with shell, quote the command path to handle spaces in usernames/paths
         command: isWindows ? `"${binary.path}"` : binary.path,
-        args: ["--lsp"],
+        args: ["lsp-proxy"],
         options: {
           // On Windows we need to run the binary in a shell to be able to execute the shell npm bin script.
           // Searching for the right `.exe` file inside `node_modules/` is not reliable as it depends on
