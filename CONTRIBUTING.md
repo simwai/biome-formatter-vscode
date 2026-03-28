@@ -1,1 +1,1 @@
-See https://oxc.rs/docs/contribute/vscode.html
+See https://biomejs.dev/docs/contribute/vscode.html

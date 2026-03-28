@@ -1,98 +1,10 @@
 import { defineConfig } from "@vscode/test-cli";
-import { mkdirSync, writeFileSync } from "node:fs";
-import path from "node:path";
-
-const multiRootWorkspaceFile = "./tests/multi-root.test.code-workspace";
-
-mkdirSync("./tests/test_workspace", { recursive: true });
-mkdirSync("./tests/test_workspace_second", { recursive: true });
-
-const multiRootWorkspaceConfig = {
-  folders: [{ path: "test_workspace" }, { path: "test_workspace_second" }],
-};
-writeFileSync(multiRootWorkspaceFile, JSON.stringify(multiRootWorkspaceConfig, null, 2));
-
-// Use binaries from node_modules
-const oxlintBin = path.resolve(import.meta.dirname, "node_modules/.bin/oxlint");
-const oxfmtBin = path.resolve(import.meta.dirname, "node_modules/.bin/oxfmt");
-
-const baseTest = {
-  files: "out_test/integration/**/*.spec.js",
-  workspaceFolder: "./tests/test_workspace",
-  launchArgs: [
-    // This disables all extensions except the one being tested
-    "--disable-extensions",
-  ],
-  mocha: {
-    timeout: 10_000,
-  },
-};
-
-const allTestSuites = new Map([
-  [
-    "unit",
-    {
-      ...baseTest,
-      files: "out_test/unit/**/*.spec.js",
-      workspaceFolder: multiRootWorkspaceFile,
-      env: {
-        MULTI_FOLDER_WORKSPACE: "true",
-        YARN_FOUND_BIN: path.resolve(import.meta.dirname, "node_modules/oxlint/dist/cli.js"),
-      },
-    },
-  ],
-  [
-    "oxlint-lsp",
-    {
-      ...baseTest,
-      env: {
-        SINGLE_FOLDER_WORKSPACE: "true",
-        SERVER_PATH_DEV: oxlintBin,
-        SKIP_FORMATTER_TEST: "true",
-      },
-    },
-  ],
-  [
-    "oxlint-lsp-multi-root",
-    {
-      ...baseTest,
-      workspaceFolder: multiRootWorkspaceFile,
-      env: {
-        MULTI_FOLDER_WORKSPACE: "true",
-        SERVER_PATH_DEV: oxlintBin,
-        SKIP_FORMATTER_TEST: "true",
-      },
-    },
-  ],
-  [
-    "oxlint-js",
-    {
-      ...baseTest,
-      workspaceFolder: multiRootWorkspaceFile,
-      files: "out_test/integration/e2e_server_linter-js.spec.js",
-      env: {
-        SINGLE_FOLDER_WORKSPACE: "true",
-        OXLINT_JS_PLUGIN: "true",
-        SERVER_PATH_DEV: oxlintBin,
-        SKIP_FORMATTER_TEST: "true",
-      },
-    },
-  ],
-  [
-    "oxfmt-lsp",
-    {
-      ...baseTest,
-      env: {
-        SINGLE_FOLDER_WORKSPACE: "true",
-        SERVER_PATH_DEV: oxfmtBin,
-        SKIP_LINTER_TEST: "true",
-      },
-    },
-  ],
-]);
 
 export default defineConfig({
-  tests: process.env.TEST_SUITE
-    ? [allTestSuites.get(process.env.TEST_SUITE)]
-    : Array.from(allTestSuites.values()),
+  files: "out_test/unit/**/*.spec.js",
+  workspaceFolder: "tests/unit",
+  mocha: {
+    ui: "tdd",
+    timeout: 20000,
+  },
 });

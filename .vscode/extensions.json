@@ -1,5 +1,5 @@
 {
   "recommendations": [
-    "simwai.biome-vscode" // oxc linter and formatter
+    "simwai.biome-vscode" // biome linter and formatter
   ]
 }
