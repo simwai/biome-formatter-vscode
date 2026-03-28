@@ -2,16 +2,12 @@ import { ConfigurationChangeEvent, workspace } from "vscode";
 import { ConfigService } from "./ConfigService";
 
 export class VSCodeConfig implements VSCodeConfigInterface {
-  private _enableOxlint!: boolean;
-  private _enableOxfmt!: boolean;
+  private _enableBiome!: boolean;
   private _trace!: TraceLevel;
-  private _binPathOxlint: string | undefined;
-  private _binPathOxfmt: string | undefined;
-  private _binPathTsGoLint: string | undefined;
+  private _binPathBiome: string | undefined;
   private _nodePath: string | undefined;
   private _useExecPath: boolean = false;
   private _requireConfig!: boolean;
-  private _suppressProgramErrors!: boolean;
 
   constructor() {
     this.refresh();
@@ -22,58 +18,24 @@ export class VSCodeConfig implements VSCodeConfigInterface {
   }
 
   public refresh(): void {
-    let binPathOxlint = this.configuration.get<string>("path.oxlint");
-    // fallback to deprecated 'path.server' setting
-    if (!binPathOxlint) {
-      binPathOxlint = this.configuration.get<string>("path.server");
-    }
     let enable =
-      this.configuration.get<boolean | null | { oxlint?: boolean; oxfmt?: boolean }>("enable") ??
-      true;
+      this.configuration.get<boolean | null>("enable") ?? true;
 
-    if (typeof enable === "boolean") {
-      // If main enable is true, both tools are enabled
-      // this is how VS Code resolves config. `oxc.enable` always wins over  `oxc.enable.oxlint` and `oxc.enable.oxfmt`
-      enable = { oxlint: enable, oxfmt: enable };
-    } else if (typeof enable === "object") {
-      // If main enable is an object, we need to ensure both keys are present
-      enable = {
-        oxlint: enable.oxlint ?? true,
-        oxfmt: enable.oxfmt ?? true,
-      };
-    } else {
-      // Fallback to enabling both if the config is somehow invalid
-      enable = { oxlint: true, oxfmt: true };
-    }
-
-    this._enableOxlint = enable.oxlint!;
-    this._enableOxfmt = enable.oxfmt!;
+    this._enableBiome = enable;
     this._trace = this.configuration.get<TraceLevel>("trace.server") || "off";
-    this._binPathOxlint = binPathOxlint;
-    this._binPathOxfmt = this.configuration.get<string>("path.oxfmt");
-    this._binPathTsGoLint = this.configuration.get<string>("path.tsgolint");
+    this._binPathBiome = this.configuration.get<string>("path.biome");
     this._nodePath = this.configuration.get<string>("path.node");
     this._useExecPath = this.configuration.get<boolean>("useExecPath") ?? false;
     this._requireConfig = this.configuration.get<boolean>("requireConfig") ?? false;
-    this._suppressProgramErrors = this.configuration.get<boolean>("suppressProgramErrors") ?? false;
   }
 
-  get enableOxlint(): boolean {
-    return this._enableOxlint;
+  get enableBiome(): boolean {
+    return this._enableBiome;
   }
 
-  updateEnableOxlint(value: boolean): PromiseLike<void> {
-    this._enableOxlint = value;
-    return this.configuration.update("enable.oxlint", value);
-  }
-
-  get enableOxfmt(): boolean {
-    return this._enableOxfmt;
-  }
-
-  updateEnableOxfmt(value: boolean): PromiseLike<void> {
-    this._enableOxfmt = value;
-    return this.configuration.update("enable.oxfmt", value);
+  updateEnableBiome(value: boolean): PromiseLike<void> {
+    this._enableBiome = value;
+    return this.configuration.update("enable", value);
   }
 
   get trace(): TraceLevel {
@@ -85,31 +47,13 @@ export class VSCodeConfig implements VSCodeConfigInterface {
     return this.configuration.update("trace.server", value);
   }
 
-  get binPathOxlint(): string | undefined {
-    return this._binPathOxlint;
+  get binPathBiome(): string | undefined {
+    return this._binPathBiome;
   }
 
-  updateBinPathOxlint(value: string | undefined): PromiseLike<void> {
-    this._binPathOxlint = value;
-    return this.configuration.update("path.oxlint", value);
-  }
-
-  get binPathOxfmt(): string | undefined {
-    return this._binPathOxfmt;
-  }
-
-  updateBinPathOxfmt(value: string | undefined): PromiseLike<void> {
-    this._binPathOxfmt = value;
-    return this.configuration.update("path.oxfmt", value);
-  }
-
-  get binPathTsGoLint(): string | undefined {
-    return this._binPathTsGoLint;
-  }
-
-  updateBinPathTsGoLint(value: string | undefined): PromiseLike<void> {
-    this._binPathTsGoLint = value;
-    return this.configuration.update("path.tsgolint", value);
+  updateBinPathBiome(value: string | undefined): PromiseLike<void> {
+    this._binPathBiome = value;
+    return this.configuration.update("path.biome", value);
   }
 
   get nodePath(): string | undefined {
@@ -139,17 +83,8 @@ export class VSCodeConfig implements VSCodeConfigInterface {
     return this.configuration.update("requireConfig", value);
   }
 
-  get suppressProgramErrors(): boolean {
-    return this._suppressProgramErrors;
-  }
-
-  updateSuppressTsconfigErrors(value: boolean): PromiseLike<void> {
-    this._suppressProgramErrors = value;
-    return this.configuration.update("suppressProgramErrors", value);
-  }
-
   /**
-   * These configuration changes need a complete restart of all language servers
+   * These configuration changes need a complete restart of the language server
    */
   private effectsGeneralLSPConnection(event: ConfigurationChangeEvent): boolean {
     return (
@@ -158,17 +93,9 @@ export class VSCodeConfig implements VSCodeConfigInterface {
     );
   }
 
-  effectsOxlintConnection(event: ConfigurationChangeEvent): boolean {
+  effectsBiomeConnection(event: ConfigurationChangeEvent): boolean {
     return (
-      event.affectsConfiguration(`${ConfigService.namespace}.path.oxlint`) ||
-      event.affectsConfiguration(`${ConfigService.namespace}.path.tsgolint`) ||
-      this.effectsGeneralLSPConnection(event)
-    );
-  }
-
-  effectsOxfmtConnection(event: ConfigurationChangeEvent): boolean {
-    return (
-      event.affectsConfiguration(`${ConfigService.namespace}.path.oxfmt`) ||
+      event.affectsConfiguration(`${ConfigService.namespace}.path.biome`) ||
       this.effectsGeneralLSPConnection(event)
     );
   }
@@ -181,62 +108,41 @@ type TraceLevel = "off" | "messages" | "verbose";
  */
 interface VSCodeConfigInterface {
   /**
-   * `oxc.enable.oxlint`
-   *
-   * @default true (falls back to `oxc.enable` if not set)
+   * `biome.enable`
+   * @default true
    */
-  enableOxlint: boolean;
+  enableBiome: boolean;
   /**
-   * `oxc.enable.oxfmt`
-   *
-   * @default true (falls back to `oxc.enable` if not set)
-   */
-  enableOxfmt: boolean;
-  /**
-   * Trace VSCode <-> Oxc Language Server communication
-   * `oxc.trace.server`
+   * Trace VSCode <-> Biome Language Server communication
+   * `biome.trace.server`
    *
    * @default 'off'
    */
   trace: TraceLevel;
   /**
-   * Path to the `oxlint` binary
-   * `oxc.path.oxlint`
+   * Path to the `biome` binary
+   * `biome.path.biome`
    * @default undefined
    */
-  binPathOxlint: string | undefined;
-
-  /**
-   * Path to the `tsgolint` binary
-   * `oxc.path.tsgolint`
-   * @default undefined
-   */
-  binPathTsGoLint: string | undefined;
+  binPathBiome: string | undefined;
 
   /**
    * Path to a JavaScript runtime binary (Node.js, bun, or deno)
-   * `oxc.path.node`
+   * `biome.path.node`
    * @default undefined
    */
   nodePath: string | undefined;
 
   /**
-   * Whether to use the extension's execPath (Electron's bundled Node.js) as the JavaScript runtime for running Oxc tools,
+   * Whether to use the extension's execPath (Electron's bundled Node.js) as the JavaScript runtime for running Biome tools,
    * instead of looking for a system Node.js installation.
    */
   useExecPath: boolean;
 
   /**
-   * Start the language server only when a `.oxlintrc.json` file exists in one of the workspaces.
-   * `oxc.requireConfig`
+   * Start the language server only when a `biome.json` file exists in one of the workspaces.
+   * `biome.requireConfig`
    * @default false
    */
   requireConfig: boolean;
-
-  /**
-   * Suppress tsconfig errors from tsgolint and still lint files under partially-valid tsconfig projects.
-   * `oxc.suppressProgramErrors`
-   * @default false
-   */
-  suppressProgramErrors: boolean;
 }

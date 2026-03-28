@@ -3,30 +3,23 @@ import { execFile } from "node:child_process";
 import * as os from "node:os";
 import { env, version, window } from "vscode";
 
-const commandPrefix = "oxc";
+const commandPrefix = "biome";
 
-export const enum OxcCommands {
-  // always available, even if no tool is active
-  ShowOutputChannelLint = `${commandPrefix}.showOutputChannel`,
-  ShowOutputChannelFmt = `${commandPrefix}.showOutputChannelFormatter`,
+export const enum BiomeCommands {
+  ShowOutputChannelLint = "biome.showOutputChannel",
+  RestartServerLint = "biome.restartServer",
+  ToggleEnableLint = "biome.toggleEnable",
+  ApplyAllFixesFile = "biome.applyAllFixesFile",
+  CopyDebugInfo = "biome.copyDebugInfo",
+}
 
-  // only for linter.ts usage
-  RestartServerLint = `${commandPrefix}.restartServer`, // without `Linter` suffix for backward compatibility
-  ToggleEnableLint = `${commandPrefix}.toggleEnable`, // without `Linter` suffix for backward compatibility
-  ApplyAllFixesFile = `${commandPrefix}.applyAllFixesFile`,
-
-  // only for formatter.ts usage
-  RestartServerFmt = `${commandPrefix}.restartServerFormatter`,
-  ToggleEnableFmt = `${commandPrefix}.toggleEnableFormatter`,
-
-  // always available
-  CopyDebugInfo = `${commandPrefix}.copyDebugInfo`,
+export const enum LspCommands {
+  FixAll = "biome.fixAll",
 }
 
 export async function copyDebugCommand(
   extensionVersion: string,
-  oxlintVersion: string,
-  oxfmtVersion: string,
+  biomeVersion: string,
   vscodeConfig: VSCodeConfig,
 ) {
   const osName = getOsName();
@@ -38,10 +31,9 @@ export async function copyDebugCommand(
     "",
     "```",
     `VS Code extension: v${extensionVersion}`,
-    `oxlint: v${oxlintVersion}`,
-    `oxfmt: v${oxfmtVersion}`,
+    `biome: v${biomeVersion}`,
     `Editor: ${env.appName} v${version} (${env.appHost})`,
-    `Operating System and Version: ${osName} (${os.arch()})`,
+    `Operating System and Version: ${osName} (${os.release()})`,
     `Node Version: ${nodeVersion} (${nodeCommand})`,
     "```",
   ].join("\n");
@@ -65,13 +57,13 @@ function getNodeVersion(nodeCommand: string): Promise<string> {
 function getOsName(): string {
   switch (os.platform()) {
     case "darwin":
-      return `macOS ${os.release()}`;
+      return "macOS";
     case "win32":
-      return `Windows ${os.release()}`;
+      return "Windows";
     case "linux":
-      return `Linux ${os.release()}`;
+      return "Linux";
     default:
-      return `${os.platform()} ${os.release()}`;
+      return os.platform();
   }
 }
 

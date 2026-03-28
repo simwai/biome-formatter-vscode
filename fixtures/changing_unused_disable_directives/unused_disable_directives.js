@@ -1,2 +1,2 @@
-// oxlint-disable-next-line no-console
+// biome-disable-next-line no-console
 (() => { "" })();

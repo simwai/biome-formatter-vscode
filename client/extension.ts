@@ -1,48 +1,34 @@
 import { commands, ExtensionContext, LogOutputChannel, window, workspace } from "vscode";
 
-import { copyDebugCommand, OxcCommands } from "./commands";
+import { copyDebugCommand, BiomeCommands } from "./commands";
 import { ConfigService } from "./ConfigService";
 import StatusBarItemHandler from "./StatusBarItemHandler";
-import Formatter from "./tools/formatter";
-import Linter from "./tools/linter";
+import BiomeTool from "./tools/biome";
 import ToolInterface from "./tools/ToolInterface";
 
-const outputChannelName = "Oxc";
+const outputChannelName = "Biome";
 const tools: ToolInterface[] = [];
 
-if (process.env.SKIP_LINTER_TEST !== "true") {
-  tools.push(new Linter());
-}
-if (process.env.SKIP_FORMATTER_TEST !== "true") {
-  tools.push(new Formatter());
-}
+tools.push(new BiomeTool());
 
 export async function activate(context: ExtensionContext) {
   const configService = new ConfigService();
 
-  const outputChannelLint = window.createOutputChannel(outputChannelName + " (Lint)", {
-    log: true,
-  });
-
-  const outputChannelFormat = window.createOutputChannel(outputChannelName + " (Fmt)", {
+  const outputChannel = window.createOutputChannel(outputChannelName, {
     log: true,
   });
 
   const statusBarItemHandler = new StatusBarItemHandler(context.extension.packageJSON?.version);
 
-  const showOutputLintCommand = commands.registerCommand(OxcCommands.ShowOutputChannelLint, () => {
-    outputChannelLint.show();
+  const showOutputCommand = commands.registerCommand(BiomeCommands.ShowOutputChannelLint, () => {
+    outputChannel.show();
   });
 
-  const showOutputFmtCommand = commands.registerCommand(OxcCommands.ShowOutputChannelFmt, () => {
-    outputChannelFormat.show();
-  });
-
-  const copyDebugInfoCommand = commands.registerCommand(OxcCommands.CopyDebugInfo, async () => {
+  const copyDebugInfoCommand = commands.registerCommand(BiomeCommands.CopyDebugInfo, async () => {
+    const biomeTool = tools[0] as BiomeTool;
     await copyDebugCommand(
       context.extension.packageJSON?.version ?? "unknown",
-      tools.find((tool) => tool instanceof Linter)?.getLspVersion() ?? "unknown",
-      tools.find((tool) => tool instanceof Formatter)?.getLspVersion() ?? "unknown",
+      biomeTool.getLspVersion() ?? "unknown",
       configService.vsCodeConfig,
     );
   });
@@ -59,12 +45,10 @@ export async function activate(context: ExtensionContext) {
   );
 
   context.subscriptions.push(
-    showOutputLintCommand,
-    showOutputFmtCommand,
+    showOutputCommand,
     copyDebugInfoCommand,
     configService,
-    outputChannelLint,
-    outputChannelFormat,
+    outputChannel,
     onDidChangeWorkspaceFoldersDispose,
     statusBarItemHandler,
   );
@@ -86,47 +70,17 @@ export async function activate(context: ExtensionContext) {
       tools.map((tool) => tool.onConfigChange(event, configService, statusBarItemHandler)),
     );
 
-    if (configService.vsCodeConfig.effectsOxlintConnection(event)) {
-      outputChannelLint.info("oxlint connection changed, restarting oxlint tool.");
-
-      const linterTool = tools.find((tool) => tool instanceof Linter);
-      if (linterTool) {
-        await restartTool(linterTool, outputChannelLint);
-      }
-    }
-
-    if (configService.vsCodeConfig.effectsOxfmtConnection(event)) {
-      outputChannelFormat.info("oxfmt connection changed, restarting oxfmt tool.");
-
-      const formatterTool = tools.find((tool) => tool instanceof Formatter);
-      if (formatterTool) {
-        await restartTool(formatterTool, outputChannelFormat);
-      }
+    if (configService.vsCodeConfig.effectsBiomeConnection(event)) {
+      outputChannel.info("biome connection changed, restarting biome tool.");
+      await restartTool(tools[0], outputChannel);
     }
   };
 
-  outputChannelFormat.info("Searching for oxfmt binary.");
-  outputChannelLint.info("Searching for oxlint binary.");
+  outputChannel.info("Searching for biome binary.");
 
-  const binaryPaths = await Promise.all(
-    tools.map((tool) =>
-      tool.getBinary(
-        tool instanceof Linter ? outputChannelLint : outputChannelFormat,
-        configService,
-      ),
-    ),
-  );
+  const binaryPath = await tools[0].getBinary(outputChannel, configService);
+  await tools[0].activate(outputChannel, configService, statusBarItemHandler, binaryPath);
 
-  await Promise.all(
-    tools.map((tool): Promise<void> => {
-      const channel = tool instanceof Linter ? outputChannelLint : outputChannelFormat;
-      const binaryPath = binaryPaths[tools.indexOf(tool)];
-
-      return tool.activate(channel, configService, statusBarItemHandler, binaryPath);
-    }),
-  );
-
-  // Finally show the status bar item.
   statusBarItemHandler.show();
 }
 

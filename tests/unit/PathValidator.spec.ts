@@ -3,38 +3,38 @@ import { validateSafeBinaryPath } from "../../client/PathValidator";
 
 suite("validateSafeBinaryPath", () => {
   test("should return true for valid binary paths", () => {
-    strictEqual(validateSafeBinaryPath("/usr/local/bin/oxc_language_server"), true);
-    strictEqual(validateSafeBinaryPath("C:\\Program Files\\oxc_language_server.exe"), true);
-    strictEqual(validateSafeBinaryPath("./oxc_language_server"), true);
-    strictEqual(validateSafeBinaryPath("/opt/oxc_language_server"), true);
+    strictEqual(validateSafeBinaryPath("/usr/local/bin/biome"), true);
+    strictEqual(validateSafeBinaryPath("C:\\Program Files\\biome.exe"), true);
+    strictEqual(validateSafeBinaryPath("./biome"), true);
+    strictEqual(validateSafeBinaryPath("/opt/biome"), true);
   });
 
-  test("should accept case variations of oxc_language_server", () => {
-    strictEqual(validateSafeBinaryPath("OXC_LANGUAGE_SERVER"), true);
-    strictEqual(validateSafeBinaryPath("OXC_LANGUAGE_SERVER.exe"), true);
-    strictEqual(validateSafeBinaryPath("/usr/local/bin/OXC_LANGUAGE_SERVER"), true);
-    strictEqual(validateSafeBinaryPath("C:\\Program Files\\OXC_LANGUAGE_SERVER.exe"), true);
+  test("should accept case variations of biome", () => {
+    strictEqual(validateSafeBinaryPath("BIOME_LANGUAGE_SERVER"), true);
+    strictEqual(validateSafeBinaryPath("BIOME_LANGUAGE_SERVER.exe"), true);
+    strictEqual(validateSafeBinaryPath("/usr/local/bin/BIOME_LANGUAGE_SERVER"), true);
+    strictEqual(validateSafeBinaryPath("C:\\Program Files\\BIOME_LANGUAGE_SERVER.exe"), true);
   });
 
   test("should reject paths with directory traversal", () => {
-    strictEqual(validateSafeBinaryPath("../oxc_language_server"), false);
-    strictEqual(validateSafeBinaryPath("../../oxc_language_server"), false);
-    strictEqual(validateSafeBinaryPath("/usr/local/../bin/oxc_language_server"), false);
-    strictEqual(validateSafeBinaryPath("..\\oxc_language_server"), false);
-    strictEqual(validateSafeBinaryPath(".\\oxc_language_server"), false);
+    strictEqual(validateSafeBinaryPath("../biome"), false);
+    strictEqual(validateSafeBinaryPath("../../biome"), false);
+    strictEqual(validateSafeBinaryPath("/usr/local/../bin/biome"), false);
+    strictEqual(validateSafeBinaryPath("..\\biome"), false);
+    strictEqual(validateSafeBinaryPath(".\\biome"), false);
   });
 
   test("should reject paths with malicious characters", () => {
-    strictEqual(validateSafeBinaryPath("oxc_language_server;rm -rf /"), false);
-    strictEqual(validateSafeBinaryPath("oxc_language_server|cat /etc/passwd"), false);
-    strictEqual(validateSafeBinaryPath("oxc_language_server$PATH"), false);
-    strictEqual(validateSafeBinaryPath("oxc_language_server>output.txt"), false);
-    strictEqual(validateSafeBinaryPath("oxc_language_server<input.txt"), false);
-    strictEqual(validateSafeBinaryPath("oxc_language_server`whoami`"), false);
-    strictEqual(validateSafeBinaryPath("oxc_language_server!"), false);
+    strictEqual(validateSafeBinaryPath("biome;rm -rf /"), false);
+    strictEqual(validateSafeBinaryPath("biome|cat /etc/passwd"), false);
+    strictEqual(validateSafeBinaryPath("biome$PATH"), false);
+    strictEqual(validateSafeBinaryPath("biome>output.txt"), false);
+    strictEqual(validateSafeBinaryPath("biome<input.txt"), false);
+    strictEqual(validateSafeBinaryPath("biome`whoami`"), false);
+    strictEqual(validateSafeBinaryPath("biome!"), false);
 
     // windows specific
-    strictEqual(validateSafeBinaryPath("oxc_language_server^&pause"), false);
-    strictEqual(validateSafeBinaryPath("oxc_language_server & del /f *"), false);
+    strictEqual(validateSafeBinaryPath("biome^&pause"), false);
+    strictEqual(validateSafeBinaryPath("biome & del /f *"), false);
   });
 });

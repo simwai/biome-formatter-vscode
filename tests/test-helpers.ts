@@ -12,35 +12,35 @@ import {
 } from "vscode";
 import path = require("path");
 
-type OxlintConfigPlugins = string[];
-type OxlintConfigCategories = Record<string, unknown>;
-type OxlintConfigGlobals = Record<string, "readonly" | "writable" | "off">;
-type OxlintConfigEnv = Record<string, boolean>;
-type OxlintConfigIgnorePatterns = string[];
-type OxlintRuleSeverity = "off" | "warn" | "error";
-type OxlintConfigRules = Record<
+type BiomeConfigPlugins = string[];
+type BiomeConfigCategories = Record<string, unknown>;
+type BiomeConfigGlobals = Record<string, "readonly" | "writable" | "off">;
+type BiomeConfigEnv = Record<string, boolean>;
+type BiomeConfigIgnorePatterns = string[];
+type BiomeRuleSeverity = "off" | "warn" | "error";
+type BiomeConfigRules = Record<
   string,
-  OxlintRuleSeverity | [OxlintRuleSeverity, Record<string, unknown>]
+  BiomeRuleSeverity | [BiomeRuleSeverity, Record<string, unknown>]
 >;
 
-export type OxlintConfigOverride = {
+export type BiomeConfigOverride = {
   files: string[];
-  env?: OxlintConfigEnv;
-  globals?: OxlintConfigGlobals;
-  plugins?: OxlintConfigPlugins;
-  categories?: OxlintConfigCategories;
-  rules?: OxlintConfigRules;
+  env?: BiomeConfigEnv;
+  globals?: BiomeConfigGlobals;
+  plugins?: BiomeConfigPlugins;
+  categories?: BiomeConfigCategories;
+  rules?: BiomeConfigRules;
 };
 
-export type OxlintConfig = {
+export type BiomeConfig = {
   $schema?: string;
-  env?: OxlintConfigEnv;
-  globals?: OxlintConfigGlobals;
-  plugins?: OxlintConfigPlugins;
-  categories?: OxlintConfigCategories;
-  rules?: OxlintConfigRules;
-  overrides?: OxlintConfigOverride[];
-  ignorePatterns?: OxlintConfigIgnorePatterns;
+  env?: BiomeConfigEnv;
+  globals?: BiomeConfigGlobals;
+  plugins?: BiomeConfigPlugins;
+  categories?: BiomeConfigCategories;
+  rules?: BiomeConfigRules;
+  overrides?: BiomeConfigOverride[];
+  ignorePatterns?: BiomeConfigIgnorePatterns;
 };
 
 export const WORKSPACE_FOLDER: WorkspaceFolder = workspace.workspaceFolders![0];
@@ -49,7 +49,7 @@ export const WORKSPACE_SECOND_FOLDER: WorkspaceFolder | undefined = workspace.wo
 export const WORKSPACE_DIR = WORKSPACE_FOLDER.uri;
 export const WORKSPACE_SECOND_DIR = WORKSPACE_SECOND_FOLDER?.uri;
 
-const rootOxlintConfigUri = Uri.joinPath(WORKSPACE_DIR, ".oxlintrc.json");
+const rootBiomeConfigUri = Uri.joinPath(WORKSPACE_DIR, ".biomerc.json");
 
 export function testSingleFolderMode(title: string, fn: Func) {
   if (process.env["SINGLE_FOLDER_WORKSPACE"] !== "true") {
@@ -72,7 +72,7 @@ export async function sleep(ms: number): Promise<void> {
 }
 
 export async function activateExtension(full: boolean = true): Promise<void> {
-  const ext = extensions.getExtension("oxc.oxc-vscode")!;
+  const ext = extensions.getExtension("biome.biome-vscode")!;
   if (!ext.isActive) {
     await ext.activate();
   }
@@ -87,9 +87,9 @@ export async function activateExtension(full: boolean = true): Promise<void> {
   }
 }
 
-export async function createOxlintConfiguration(configuration: OxlintConfig): Promise<void> {
+export async function createBiomeConfiguration(configuration: BiomeConfig): Promise<void> {
   const edit = new WorkspaceEdit();
-  edit.createFile(rootOxlintConfigUri, {
+  edit.createFile(rootBiomeConfigUri, {
     contents: Buffer.from(JSON.stringify(configuration)),
     overwrite: true,
   });
@@ -154,10 +154,10 @@ export async function writeToFixtureFile(
   await window.showTextDocument(fileUri);
 
   for (const char of content) {
-    // oxlint-disable eslint/no-await-in-loop -- simulate key presses
+    // biome-disable eslint/no-await-in-loop -- simulate key presses
     await commands.executeCommand("type", { text: char });
     await sleep(50);
-    // oxlint-enable eslint/no-await-in-loop
+    // biome-enable eslint/no-await-in-loop
   }
 }
 

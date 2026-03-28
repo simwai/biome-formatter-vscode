@@ -1,55 +1,47 @@
 {
-  "name": "oxc-vscode",
-  "displayName": "Oxc",
+  "name": "biome-vscode",
+  "displayName": "Biome Formatter",
   "version": "1.51.0",
-  "description": "Oxlint and Oxfmt editor integration",
+  "description": "Biome linter and formatter integration",
   "categories": [
     "Formatters",
     "Linters"
   ],
   "keywords": [
+    "biomejs",
     "formatter",
     "linter",
-    "oxc",
-    "oxfmt",
-    "oxlint"
+    "biome"
   ],
   "bugs": {
-    "url": "https://github.com/oxc-project/oxc-vscode/issues"
+    "url": "https://github.com/simwai/biome-vscode/issues"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oxc-project/oxc-vscode.git"
+    "url": "https://github.com/simwai/biome-vscode"
   },
-  "sponsor": {
-    "url": "https://github.com/sponsors/boshen"
-  },
-  "publisher": "oxc",
+  "publisher": "simwai",
   "main": "./out/main.js",
   "scripts": {
-    "preinstall": "[ -f icon.png ] || curl https://cdn.jsdelivr.net/gh/oxc-project/oxc-assets/black-bg-circle.png --output icon.png",
+    "preinstall": "[ -f icon.png ] || curl https://cdn.jsdelivr.net/gh/biomejs/biome-assets/black-bg-circle.png --output icon.png",
     "build": "pnpm run compile && pnpm run package",
     "compile": "rolldown -c rolldown.config.ts",
     "watch": "pnpm run compile --watch",
-    "package": "vsce package --no-dependencies -o oxc_language_server.vsix",
-    "package:pre-release": "vsce package --no-dependencies --pre-release -o oxc_language_server.vsix",
-    "install-extension": "code --install-extension oxc_language_server.vsix --force",
+    "package": "vsce package --no-dependencies -o biome_formatter.vsix",
+    "package:pre-release": "vsce package --no-dependencies --pre-release -o biome_formatter.vsix",
+    "install-extension": "code --install-extension biome_formatter.vsix --force",
     "test": "cross-env TEST=true pnpm run compile && vscode-test",
     "test:unit": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=unit vscode-test",
-    "test:oxlint": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=oxlint-lsp vscode-test",
-    "test:oxlint-js": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=oxlint-js vscode-test",
-    "test:oxlint-multi-root": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=oxlint-lsp-multi-root vscode-test",
-    "test:oxfmt": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=oxfmt-lsp vscode-test",
-    "lint": "oxlint -c oxlint.config.json",
-    "fmt": "oxfmt --write -c oxfmt.config.json",
-    "fmt:check": "oxfmt --check -c oxfmt.config.json",
-    "docs:update": "node scripts/vscode_docs.ts update && pnpm run fmt"
+    "test:biome": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=biome-lsp vscode-test",
+    "lint": "biome lint",
+    "fmt": "biome format --write"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.9",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.1.0",
     "@types/vscode": "1.93.0",
@@ -58,60 +50,48 @@
     "@vscode/vsce": "^3.7.1",
     "cross-env": "^10.1.0",
     "ovsx": "^0.10.9",
-    "oxfmt": "latest",
-    "oxlint": "latest",
-    "oxlint-tsgolint": "^0.18.0",
     "rolldown": "1.0.0-rc.12",
     "tinyglobby": "^0.2.15"
   },
   "contributes": {
     "commands": [
       {
-        "command": "oxc.restartServer",
-        "title": "Restart oxlint Server",
-        "category": "Oxc"
+        "command": "biome.restartServer",
+        "title": "Restart Biome Server",
+        "category": "Biome"
       },
       {
-        "command": "oxc.restartServerFormatter",
-        "title": "Restart oxfmt Server",
-        "category": "Oxc"
+        "command": "biome.toggleEnable",
+        "title": "Toggle whether Biome is enabled",
+        "category": "Biome"
       },
       {
-        "command": "oxc.toggleEnable",
-        "title": "Toggle whether oxlint is enabled",
-        "category": "Oxc"
+        "command": "biome.showOutputChannel",
+        "title": "Show Output Channel",
+        "category": "Biome"
       },
       {
-        "command": "oxc.toggleEnableFormatter",
-        "title": "Toggle whether oxfmt is enabled",
-        "category": "Oxc"
-      },
-      {
-        "command": "oxc.showOutputChannel",
-        "title": "Show Output Channel (Linter)",
-        "category": "Oxc"
-      },
-      {
-        "command": "oxc.showOutputChannelFormatter",
-        "title": "Show Output Channel (Formatter)",
-        "category": "Oxc"
-      },
-      {
-        "command": "oxc.applyAllFixesFile",
+        "command": "biome.applyAllFixesFile",
         "title": "Fix all auto-fixable problems (file)",
-        "category": "Oxc"
+        "category": "Biome"
       },
       {
-        "command": "oxc.copyDebugInfo",
+        "command": "biome.copyDebugInfo",
         "title": "Copy Debug Info",
-        "category": "Oxc"
+        "category": "Biome"
       }
     ],
     "configuration": {
       "type": "object",
-      "title": "oxc",
+      "title": "biome",
       "properties": {
-        "oxc.lint.run": {
+        "biome.enable": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "markdownDescription": "Enable or disable Biome extension."
+        },
+        "biome.lint.run": {
           "scope": "resource",
           "type": "string",
           "enum": [
@@ -121,34 +101,13 @@
           "default": "onType",
           "markdownDescription": "Run the linter on save (onSave) or on type (onType)"
         },
-        "oxc.enable": {
-          "type": [
-            "boolean",
-            "null"
-          ],
-          "default": null,
-          "scope": "window",
-          "markdownDescription": "This is a master toggle for both `oxc.enable.oxlint` and `oxc.enable.oxfmt`."
-        },
-        "oxc.enable.oxlint": {
-          "type": "boolean",
-          "default": true,
-          "scope": "window",
-          "markdownDescription": "Enable oxlint (linter). Falls back to `oxc.enable` if not set."
-        },
-        "oxc.enable.oxfmt": {
-          "type": "boolean",
-          "default": true,
-          "scope": "window",
-          "markdownDescription": "Enable oxfmt (formatter). Falls back to `oxc.enable` if not set."
-        },
-        "oxc.requireConfig": {
+        "biome.requireConfig": {
           "scope": "resource",
           "type": "boolean",
           "default": false,
-          "markdownDescription": "Start the language server only when a `.oxlintrc.json(c)` or `oxlint.config.ts` file exists in one of the workspaces."
+          "markdownDescription": "Start the language server only when a `biome.json` or `biome.jsonc` file exists in one of the workspaces."
         },
-        "oxc.trace.server": {
+        "biome.trace.server": {
           "type": "string",
           "scope": "window",
           "enum": [
@@ -164,170 +123,54 @@
           "default": "off",
           "markdownDescription": "Traces the communication between VS Code and the language server."
         },
-        "oxc.configPath": {
+        "biome.configPath": {
           "type": [
             "string",
             "null"
           ],
           "scope": "resource",
           "default": null,
-          "markdownDescription": "Path to oxlint configuration. Keep it empty to enable nested configuration."
+          "markdownDescription": "Path to biome configuration. Keep it empty to enable nested configuration."
         },
-        "oxc.tsConfigPath": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "scope": "resource",
-          "default": null,
-          "markdownDescription": "Path to the project's TypeScript config file. \n\nIf your `tsconfig.json` is not at the root, you will need this set for the `import` plugin rules to resolve imports correctly."
-        },
-        "oxc.unusedDisableDirectives": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "scope": "resource",
-          "enum": [
-            "allow",
-            "warn",
-            "deny"
-          ],
-          "markdownEnumDescriptions": [
-            "Allow all `oxlint-disable` and `eslint-disable` directives, even if they do nothing.",
-            "Warn about `oxlint-disable` and `eslint-disable` directives that do nothing.",
-            "Error on `oxlint-disable` and `eslint-disable` directives that do nothing."
-          ],
-          "default": null,
-          "markdownDescription": "Define how directive comments like `// oxlint-disable-line` should be reported, when no errors would have been reported on that line anyway. It is preferred to use `options.reportUnusedDisableDirectives` in your configuration file"
-        },
-        "oxc.typeAware": {
-          "type": [
-            "boolean",
-            "null"
-          ],
-          "scope": "resource",
-          "default": null,
-          "markdownDescription": "Forces type-aware linting. Requires the `oxlint-tsgolint` package. It is preferred to use `options.typeAware` in your configuration file"
-        },
-        "oxc.disableNestedConfig": {
+        "biome.disableNestedConfig": {
           "type": "boolean",
           "scope": "resource",
           "default": false,
-          "markdownDescription": "Disable searching for nested configuration files. When set to true, only the configuration file specified in `oxc.configPath` (if any) will be used."
+          "markdownDescription": "Disable searching for nested configuration files."
         },
-        "oxc.fixKind": {
+        "biome.path.biome": {
           "type": "string",
-          "scope": "resource",
-          "enum": [
-            "safe_fix",
-            "safe_fix_or_suggestion",
-            "dangerous_fix",
-            "dangerous_fix_or_suggestion",
-            "none",
-            "all"
-          ],
-          "markdownEnumDescriptions": [
-            "Only safe fixes will be applied",
-            "Safe fixes or suggestions will be applied",
-            "Safe and dangerous fixes will be applied",
-            "Safe and dangerous fixes or suggestions will be applied",
-            "No fixes will be applied",
-            "All fixes and suggestions will be applied"
-          ],
-          "default": "safe_fix",
-          "markdownDescription": "Specify the kind of fixes to suggest/apply."
+          "scope": "window",
+          "markdownDescription": "Path to a Biome binary. Default: auto detection in `node_modules`."
         },
-        "oxc.flags": {
-          "type": "object",
-          "scope": "resource",
-          "default": {},
-          "markdownDescription": "Specific Oxlint flags to pass to the language server.",
-          "deprecated": true,
-          "markdownDeprecationMessage": "deprecated since 1.25.0, use `oxc.fixKind` or `oxc.disableNestedConfig` instead."
+        "biome.path.node": {
+          "type": "string",
+          "scope": "window",
+          "markdownDescription": "Path to a Node.js binary."
         },
-        "oxc.fmt.experimental": {
-          "type": "boolean",
-          "scope": "resource",
-          "default": true,
-          "markdownDescription": "Enable Oxfmt formatting support.",
-          "deprecated": true,
-          "markdownDeprecationMessage": "The formatter is now stable, this setting has no effect."
-        },
-        "oxc.fmt.configPath": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "scope": "resource",
-          "default": null,
-          "markdownDescription": "Path to an oxfmt configuration file"
-        },
-        "oxc.suppressProgramErrors": {
+        "biome.useExecPath": {
           "type": "boolean",
           "scope": "window",
           "default": false,
-          "markdownDescription": "Suppress tsconfig errors from tsgolint and still lint files under partially-valid tsconfig projects. When enabled, sets `OXLINT_TSGOLINT_DANGEROUSLY_SUPPRESS_PROGRAM_DIAGNOSTICS=true`. **Note:** Type-aware lint rules may produce degraded results when the tsconfig is broken."
-        },
-        "oxc.path.server": {
-          "type": "string",
-          "scope": "window",
-          "markdownDescription": "Path to Oxc language server binary. Mostly for testing the language server.",
-          "deprecated": true,
-          "markdownDeprecationMessage": "Use `oxc.path.oxlint` instead, targeting the `oxlint` binary."
-        },
-        "oxc.path.oxlint": {
-          "type": "string",
-          "scope": "window",
-          "markdownDescription": "Path to an Oxc linter binary. Default: auto detection in `node_modules`."
-        },
-        "oxc.path.oxfmt": {
-          "type": "string",
-          "scope": "window",
-          "markdownDescription": "Path to an Oxc formatter binary. Default: auto detection in `node_modules`."
-        },
-        "oxc.path.tsgolint": {
-          "type": "string",
-          "scope": "window",
-          "markdownDescription": "Path to an Oxc tsgolint binary. Default: auto detection from `oxlint`."
-        },
-        "oxc.path.node": {
-          "type": "string",
-          "scope": "window",
-          "markdownDescription": "Path to a Node.js binary. Will be added to the `oxfmt` and `oxlint` `PATH` environment."
-        },
-        "oxc.useExecPath": {
-          "type": "boolean",
-          "scope": "window",
-          "default": false,
-          "markdownDescription": "Whether to use the extension's execPath (Electron's bundled Node.js) as the JavaScript runtime for running Oxc tools, instead of looking for a system Node.js installation."
+          "markdownDescription": "Whether to use the extension's execPath (Electron's bundled Node.js) as the JavaScript runtime for running Biome tools."
         }
       }
     },
     "jsonValidation": [
       {
         "fileMatch": [
-          ".oxlintrc.json",
-          ".oxlintrc.jsonc"
+          "biome.json",
+          "biome.jsonc"
         ],
-        "url": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json"
-      },
-      {
-        "fileMatch": [
-          ".oxfmtrc.json",
-          ".oxfmtrc.jsonc"
-        ],
-        "url": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxfmt/configuration_schema.json"
+        "url": "https://biomejs.dev/schemas/1.9.0/schema.json"
       }
     ],
     "languages": [
       {
         "id": "jsonc",
         "filenames": [
-          ".oxlintrc.json",
-          ".oxlintrc.jsonc",
-          ".oxfmtrc.json",
-          ".oxfmtrc.jsonc"
+          "biome.json",
+          "biome.jsonc"
         ]
       }
     ]
@@ -336,24 +179,19 @@
     "onLanguage:astro",
     "onLanguage:css",
     "onLanguage:graphql",
-    "onLanguage:handlebars",
     "onLanguage:html",
     "onLanguage:javascript",
     "onLanguage:javascriptreact",
     "onLanguage:json",
-    "onLanguage:json5",
     "onLanguage:jsonc",
     "onLanguage:less",
     "onLanguage:markdown",
     "onLanguage:mdx",
-    "onLanguage:mjml",
     "onLanguage:scss",
     "onLanguage:svelte",
-    "onLanguage:toml",
     "onLanguage:typescript",
     "onLanguage:typescriptreact",
-    "onLanguage:vue",
-    "onLanguage:yaml"
+    "onLanguage:vue"
   ],
   "icon": "icon.png",
   "engines": {
@@ -365,12 +203,9 @@
       "supported": "limited",
       "description": "The Extension will always use the Language Server shipped with the Extension.",
       "restrictedConfigurations": [
-        "oxc.path.server",
-        "oxc.path.oxlint",
-        "oxc.path.oxfmt",
-        "oxc.path.tsgolint",
-        "oxc.path.node",
-        "oxc.useExecPath"
+        "biome.path.biome",
+        "biome.path.node",
+        "biome.useExecPath"
       ]
     }
   },
