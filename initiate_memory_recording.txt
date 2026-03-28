@@ -1,6 +1,0 @@
-I have successfully transformed the Oxc VS Code extension into a Biome Formatter extension.
-Key learnings:
-- Renaming namespaces across a codebase requires careful search-and-replace for both lowercase, uppercase, and camelCase variants.
-- Merging two separate tools (linter/formatter) into a single LSP connection simplifies the architecture and improves performance.
-- Updating extension metadata (publisher, name, identifier) must be consistent across package.json, README.md, and configuration files.
-- Testing is crucial, but outdated tests that rely on old architecture should be removed if they are no longer relevant to the new toolchain.
