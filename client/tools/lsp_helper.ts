@@ -13,7 +13,7 @@ export function runExecutable(
   const serverEnv: Record<string, string> = {
     ...process.env,
     RUST_LOG: process.env.RUST_LOG || "info", // Keep for backward compatibility for a while
-    BIOME_LOG: process.env.BIOME_LOG || "info",
+    OXC_LOG: process.env.OXC_LOG || "info",
     NO_COLOR: "1",
   };
   if (tsgolintPath) {

@@ -31,10 +31,11 @@
     "package": "vsce package --no-dependencies -o biome_formatter.vsix",
     "package:pre-release": "vsce package --no-dependencies --pre-release -o biome_formatter.vsix",
     "install-extension": "code --install-extension biome_formatter.vsix --force",
-    "lint": "biome lint",
-    "fmt": "biome format --write",
     "test": "cross-env TEST=true pnpm run compile && vscode-test",
-    "test:unit": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=unit vscode-test"
+    "test:unit": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=unit vscode-test",
+    "test:biome": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=biome-lsp vscode-test",
+    "lint": "biome lint",
+    "fmt": "biome format --write"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
