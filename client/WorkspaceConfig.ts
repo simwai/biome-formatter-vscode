@@ -2,111 +2,38 @@ import { ConfigurationChangeEvent, ConfigurationTarget, workspace, WorkspaceFold
 import { DiagnosticPullMode } from "vscode-languageclient";
 import { ConfigService } from "./ConfigService";
 
-export const oxlintConfigFileName = ".oxlintrc.json";
-
-type UnusedDisableDirectives = "allow" | "warn" | "deny";
-
-export enum FixKind {
-  SafeFix = "safe_fix",
-  SafeFixOrSuggestion = "safe_fix_or_suggestion",
-  DangerousFix = "dangerous_fix",
-  DangerousFixOrSuggestion = "dangerous_fix_or_suggestion",
-  None = "none",
-  All = "all",
-}
+export const biomeConfigDefaultFilePattern = "**/{biome.json,biome.jsonc}";
 
 /**
  * This interface defines the configuration sent between the VS Code extension and the LSP.
  * Extension configuration is handled by `VSCodeConfig`.
- * All `null` values should be converted to `undefined` when sending to the LSP, to avoid confusion between "not set" and "set to null".
  */
 interface WorkspaceConfigInterface {
   /**
-   * oxlint config path
-   *
-   * `oxc.configPath`
-   *
-   * @default null
+   * biome config path
+   * `biome.configPath`
    */
   configPath?: string | null;
-  /**
-   * typescript config path
-   *
-   * `oxc.tsConfigPath`
-   *
-   * @default null
-   */
-  tsConfigPath?: string | null;
+
   /**
    * When to run the linter and generate diagnostics
-   * `oxc.lint.run`
-   *
-   * @default 'onType'
+   * `biome.lint.run`
    */
   run?: DiagnosticPullMode;
 
   /**
-   * Define how directive comments like `// oxlint-disable-line` should be reported,
-   * when no errors would have been reported on that line anyway.
-   * Boolean or null (from configuration file).
-   *
-   * `oxc.unusedDisableDirectives`
-   *
-   * @default null
-   */
-  unusedDisableDirectives?: UnusedDisableDirectives | null;
-
-  /**
-   * Whether to enable type-aware linting. Boolean or null (from configuration file).
-   *
-   * `oxc.typeAware`
-   *
-   * @default null
-   */
-  typeAware?: boolean | null;
-
-  /**
    * Disable nested config files detection
-   * `oxc.disableNestedConfig`
-   * @default false
+   * `biome.disableNestedConfig`
    */
   disableNestedConfig?: boolean;
-
-  /**
-   * Fix kind to use when applying fixes
-   * `oxc.fixKind`
-   * @default 'safe_fix'
-   */
-  fixKind?: FixKind;
-
-  /**
-   * Additional flags to pass to the LSP binary
-   * `oxc.flags`
-   *
-   * @default {}
-   */
-  flags?: Record<string, string>;
-
-  /**
-   * Path to an oxfmt configuration file
-   * `oxc.fmt.configPath`
-   */
-  ["fmt.configPath"]?: string | null;
 }
 
-export type OxlintWorkspaceConfigInterface = Omit<WorkspaceConfigInterface, "fmt.configPath">;
-
-export type OxfmtWorkspaceConfigInterface = Pick<WorkspaceConfigInterface, "fmt.configPath">;
+export type BiomeWorkspaceConfigInterface = WorkspaceConfigInterface;
 
 export class WorkspaceConfig {
   private _configPath: string | null = null;
-  private _tsConfigPath: string | null = null;
   private _runTrigger: DiagnosticPullMode = DiagnosticPullMode.onType;
-  private _unusedDisableDirectives: UnusedDisableDirectives | null = null;
-  private _typeAware: boolean | null = null;
   private _disableNestedConfig: boolean = false;
-  private _fixKind: FixKind = FixKind.SafeFix;
-  private _formattingConfigPath: string | null = null;
 
   constructor(private readonly workspace: WorkspaceFolder) {
     this.refresh();
@@ -117,187 +44,42 @@ export class WorkspaceConfig {
   }
 
   public refresh(): void {
-    const flags = this.configuration.get<Record<string, string>>("flags") ?? {};
-
-    // `configuration.get` takes the default value from the package.json, which is always `safe_fix`.
-    // We need to check the deprecated flags.fix_kind for the real default value.
-    let fixKind = this.configuration.get<FixKind>("fixKind");
-    if (
-      fixKind === FixKind.SafeFix &&
-      flags.fix_kind !== undefined &&
-      flags.fix_kind !== "safe_fix"
-    ) {
-      fixKind = flags.fix_kind as FixKind;
-    }
-
-    // the same for disabledNestedConfig
-    let disableNestedConfig = this.configuration.get<boolean>("disableNestedConfig");
-    if (disableNestedConfig === false && flags.disable_nested_config === "true") {
-      disableNestedConfig = true;
-    }
-
     this._runTrigger =
       this.configuration.get<DiagnosticPullMode>("lint.run") || DiagnosticPullMode.onType;
     this._configPath = this.configuration.get<string | null>("configPath") ?? null;
-    this._tsConfigPath = this.configuration.get<string | null>("tsConfigPath") ?? null;
-    this._unusedDisableDirectives =
-      this.configuration.get<UnusedDisableDirectives | null>("unusedDisableDirectives") ?? null;
-    this._typeAware = this.configuration.get<boolean | null>("typeAware") ?? null;
-    this._disableNestedConfig = disableNestedConfig ?? false;
-    this._fixKind = fixKind ?? FixKind.SafeFix;
-    this._formattingConfigPath = this.configuration.get<string | null>("fmt.configPath") ?? null;
+    this._disableNestedConfig = this.configuration.get<boolean>("disableNestedConfig") ?? false;
   }
 
   public effectsConfigChange(event: ConfigurationChangeEvent): boolean {
-    if (event.affectsConfiguration(`${ConfigService.namespace}.configPath`, this.workspace)) {
-      return true;
-    }
-    if (event.affectsConfiguration(`${ConfigService.namespace}.tsConfigPath`, this.workspace)) {
-      return true;
-    }
-    if (event.affectsConfiguration(`${ConfigService.namespace}.lint.run`, this.workspace)) {
-      return true;
-    }
-    if (
-      event.affectsConfiguration(
-        `${ConfigService.namespace}.unusedDisableDirectives`,
-        this.workspace,
-      )
-    ) {
-      return true;
-    }
-    if (event.affectsConfiguration(`${ConfigService.namespace}.typeAware`, this.workspace)) {
-      return true;
-    }
-    if (
-      event.affectsConfiguration(`${ConfigService.namespace}.disableNestedConfig`, this.workspace)
-    ) {
-      return true;
-    }
-    if (event.affectsConfiguration(`${ConfigService.namespace}.fixKind`, this.workspace)) {
-      return true;
-    }
-    if (event.affectsConfiguration(`${ConfigService.namespace}.fmt.configPath`, this.workspace)) {
-      return true;
-    }
-    // deprecated settings in flags
-    if (event.affectsConfiguration(`${ConfigService.namespace}.flags`, this.workspace)) {
-      return true;
-    }
-    return false;
-  }
-
-  public get isCustomConfigPath(): boolean {
-    return this.configPath !== null && this.configPath !== oxlintConfigFileName;
+    const ns = ConfigService.namespace;
+    return (
+      event.affectsConfiguration(`${ns}.configPath`, this.workspace) ||
+      event.affectsConfiguration(`${ns}.lint.run`, this.workspace) ||
+      event.affectsConfiguration(`${ns}.disableNestedConfig`, this.workspace)
+    );
   }
 
   get runTrigger(): DiagnosticPullMode {
     return this._runTrigger;
   }
 
-  updateRunTrigger(value: DiagnosticPullMode): PromiseLike<void> {
-    this._runTrigger = value;
-    return this.configuration.update("lint.run", value, ConfigurationTarget.WorkspaceFolder);
-  }
-
   get configPath(): string | null {
     return this._configPath;
-  }
-
-  updateConfigPath(value: string | null): PromiseLike<void> {
-    this._configPath = value;
-    return this.configuration.update("configPath", value, ConfigurationTarget.WorkspaceFolder);
-  }
-
-  get tsConfigPath(): string | null {
-    return this._tsConfigPath;
-  }
-
-  updateTsConfigPath(value: string | null): PromiseLike<void> {
-    this._tsConfigPath = value;
-    return this.configuration.update("tsConfigPath", value, ConfigurationTarget.WorkspaceFolder);
-  }
-
-  get unusedDisableDirectives(): UnusedDisableDirectives | null {
-    return this._unusedDisableDirectives;
-  }
-
-  updateUnusedDisableDirectives(value: UnusedDisableDirectives | null): PromiseLike<void> {
-    this._unusedDisableDirectives = value;
-    return this.configuration.update(
-      "unusedDisableDirectives",
-      value,
-      ConfigurationTarget.WorkspaceFolder,
-    );
-  }
-
-  get typeAware(): boolean | null {
-    return this._typeAware;
-  }
-
-  updateTypeAware(value: boolean | null): PromiseLike<void> {
-    this._typeAware = value;
-    return this.configuration.update("typeAware", value, ConfigurationTarget.WorkspaceFolder);
   }
 
   get disableNestedConfig(): boolean {
     return this._disableNestedConfig;
   }
 
-  updateDisableNestedConfig(value: boolean): PromiseLike<void> {
-    this._disableNestedConfig = value;
-    return this.configuration.update(
-      "disableNestedConfig",
-      value,
-      ConfigurationTarget.WorkspaceFolder,
-    );
-  }
-
-  get fixKind(): FixKind {
-    return this._fixKind;
-  }
-
-  updateFixKind(value: FixKind): PromiseLike<void> {
-    this._fixKind = value;
-    return this.configuration.update("fixKind", value, ConfigurationTarget.WorkspaceFolder);
-  }
-
-  get formattingConfigPath(): string | null {
-    return this._formattingConfigPath;
-  }
-
-  updateFormattingConfigPath(value: string | null): PromiseLike<void> {
-    this._formattingConfigPath = value;
-    return this.configuration.update("fmt.configPath", value, ConfigurationTarget.WorkspaceFolder);
-  }
-
   public shouldRequestDiagnostics(diagnosticPullMode: DiagnosticPullMode): boolean {
     return diagnosticPullMode === this.runTrigger;
   }
 
-  public toOxlintConfig(): OxlintWorkspaceConfigInterface {
+  public toBiomeConfig(): BiomeWorkspaceConfigInterface {
     return {
-      configPath: this.configPath ?? undefined,
-      tsConfigPath: this.tsConfigPath ?? undefined,
-      unusedDisableDirectives: this.unusedDisableDirectives ?? undefined,
-      typeAware: this.typeAware ?? undefined,
-      disableNestedConfig: this.disableNestedConfig,
-      fixKind: this.fixKind,
-      // keep for backward compatibility
+      configPath: this.configPath,
       run: this.runTrigger,
-      // deprecated, kept for backward compatibility
-      flags: {
-        disable_nested_config: this.disableNestedConfig ? "true" : "false",
-        ...(this.fixKind ? { fix_kind: this.fixKind } : {}),
-      },
-    };
-  }
-
-  public toOxfmtConfig(): OxfmtWorkspaceConfigInterface {
-    return {
-      // @ts-expect-error -- deprecated setting, kept for backward compatibility
-      ["fmt.experimental"]: true,
-      ["fmt.configPath"]: this.formattingConfigPath ?? undefined,
+      disableNestedConfig: this.disableNestedConfig,
     };
   }
 }

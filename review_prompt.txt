@@ -1,0 +1,9 @@
+I have transformed the Oxc VS Code extension into a Biome Formatter extension.
+Key changes:
+- Renamed all Oxc identifiers to Biome.
+- Unified linter and formatter into a single Biome tool.
+- Updated settings to use the 'biome' namespace.
+- Updated package.json and README.md with 'Biome Formatter' branding and author 'simwai'.
+- Updated dependencies to @biomejs/biome.
+- Simplified configuration and binary search logic.
+- Removed outdated Oxc tests.

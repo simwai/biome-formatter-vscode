@@ -13,19 +13,19 @@ export function runExecutable(
   const serverEnv: Record<string, string> = {
     ...process.env,
     RUST_LOG: process.env.RUST_LOG || "info", // Keep for backward compatibility for a while
-    OXC_LOG: process.env.OXC_LOG || "info",
+    BIOME_LOG: process.env.BIOME_LOG || "info",
     NO_COLOR: "1",
   };
   if (tsgolintPath) {
-    serverEnv.OXLINT_TSGOLINT_PATH = tsgolintPath;
+    serverEnv.BIOME_TSGOLINT_PATH = tsgolintPath;
   }
   if (suppressProgramErrors) {
-    serverEnv.OXLINT_TSGOLINT_DANGEROUSLY_SUPPRESS_PROGRAM_DIAGNOSTICS = "true";
+    serverEnv.BIOME_TSGOLINT_DANGEROUSLY_SUPPRESS_PROGRAM_DIAGNOSTICS = "true";
   }
-  // when the binary path ends with `oxlint/bin/oxlint` or a common js extension, we should run it with `node`
+  // when the binary path ends with `biome/bin/biome` or a common js extension, we should run it with `node`
   // the path is defined in `ConfigService.searchNodeModulesBin`
   // Probably it would be better to read the shebang for unknown extensions, and run with `node` if the shebang contains `node`,
-  // but for now we can just check for common node extensions and the known path for `oxlint`
+  // but for now we can just check for common node extensions and the known path for `biome`
   const isNode = binary.loader === "node";
 
   let nodeCommand: string;
@@ -46,8 +46,8 @@ export function runExecutable(
 
   // In Yarn PnP environments, inject the PnP loaders so that both CJS require()
   // and ESM import calls can resolve dependencies through PnP.
-  // --require .pnp.cjs: patches CJS resolution (e.g., oxlint's NAPI-RS bindings via createRequire)
-  // --loader .pnp.loader.mjs: patches ESM resolution (e.g., oxfmt's tinypool import)
+  // --require .pnp.cjs: patches CJS resolution (e.g., biome's NAPI-RS bindings via createRequire)
+  // --loader .pnp.loader.mjs: patches ESM resolution (e.g., biome's tinypool import)
   const pnpArgs: string[] = [];
   if (isNode && binary.yarnPnpLoaderPath) {
     pnpArgs.push("--require", binary.yarnPnpLoaderPath);

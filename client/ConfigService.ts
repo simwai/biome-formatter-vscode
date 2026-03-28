@@ -10,13 +10,12 @@ import {
 import { IDisposable } from "./types";
 import { VSCodeConfig } from "./VSCodeConfig";
 import {
-  OxfmtWorkspaceConfigInterface,
-  OxlintWorkspaceConfigInterface,
+  BiomeWorkspaceConfigInterface,
   WorkspaceConfig,
 } from "./WorkspaceConfig";
 
 export class ConfigService implements IDisposable {
-  public static readonly namespace = "oxc";
+  public static readonly namespace = "biome";
   private readonly _disposables: IDisposable[] = [];
 
   public vsCodeConfig: VSCodeConfig;
@@ -43,28 +42,16 @@ export class ConfigService implements IDisposable {
     this._disposables.push(disposeChangeListener);
   }
 
-  public get oxlintServerConfig(): {
+  public get biomeServerConfig(): {
     workspaceUri: string;
-    options: OxlintWorkspaceConfigInterface;
+    options: BiomeWorkspaceConfigInterface;
   }[] {
     return [...this.workspaceConfigs.entries()].map(([path, config]) => {
-      const options = config.toOxlintConfig();
-
       return {
         workspaceUri: Uri.file(path).toString(),
-        options,
+        options: config.toBiomeConfig(),
       };
     });
-  }
-
-  public get formatterServerConfig(): {
-    workspaceUri: string;
-    options: OxfmtWorkspaceConfigInterface;
-  }[] {
-    return [...this.workspaceConfigs.entries()].map(([path, config]) => ({
-      workspaceUri: Uri.file(path).toString(),
-      options: config.toOxfmtConfig(),
-    }));
   }
 
   public addWorkspaceConfig(workspace: WorkspaceFolder): void {
@@ -88,19 +75,15 @@ export class ConfigService implements IDisposable {
     return false;
   }
 
-  public async getOxlintServerBinPath(): Promise<BinarySearchResult | undefined> {
-    return this.searchBinaryPath(this.vsCodeConfig.binPathOxlint, "oxlint");
-  }
-
-  public async getOxfmtServerBinPath(): Promise<BinarySearchResult | undefined> {
-    return this.searchBinaryPath(this.vsCodeConfig.binPathOxfmt, "oxfmt");
+  public async getBiomeServerBinPath(): Promise<BinarySearchResult | undefined> {
+    return this.searchBinaryPath(this.vsCodeConfig.binPathBiome, "biome");
   }
 
   public shouldRequestDiagnostics(
     textDocumentUri: Uri,
     diagnosticPullMode: DiagnosticPullMode,
   ): boolean {
-    if (!this.vsCodeConfig.enableOxlint) {
+    if (!this.vsCodeConfig.enableBiome) {
       return false;
     }
 
