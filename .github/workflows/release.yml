@@ -86,7 +86,7 @@ jobs:
         with:
           if-no-files-found: error
           name: vsix
-          path: ./oxc_language_server.vsix
+          path: ./biome_formatter.vsix
 
   publish-vsce:
     name: Publish to Microsoft Marketplace
@@ -112,7 +112,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Publish to Microsoft Marketplace
-        run: pnpm exec vsce publish ${{ needs.check.outputs.is_pre_release == 'true' && '--pre-release' || '' }} --packagePath oxc_language_server.vsix
+        run: pnpm exec vsce publish ${{ needs.check.outputs.is_pre_release == 'true' && '--pre-release' || '' }} --packagePath biome_formatter.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
 
@@ -140,7 +140,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Publish to Open VSX Registry
-        run: pnpm exec ovsx publish ${{ needs.check.outputs.is_pre_release == 'true' && '--pre-release' || '' }} --packagePath oxc_language_server.vsix
+        run: pnpm exec ovsx publish ${{ needs.check.outputs.is_pre_release == 'true' && '--pre-release' || '' }} --packagePath biome_formatter.vsix
         env:
           OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
 

@@ -1,5 +1,9 @@
 {
-  "rules": {
-      "no-const-assign": "error"
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noConstAssign": "error"
+      }
+    }
   }
 }

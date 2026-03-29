@@ -1,7 +1,9 @@
 {
-  "jsPlugins": ["./plugin.js"],
-  "rules": {
-    "js-plugin/test-rule": "error",
-    "no-debugger": "off",
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noDebugger": "off"
+      }
+    }
   }
 }

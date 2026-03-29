@@ -1,5 +1,9 @@
 {
-  "rules": {
-      "unicorn/switch-case-braces": "warn"
+  "linter": {
+    "rules": {
+      "style": {
+        "useBlockStatements": "warn"
+      }
+    }
   }
 }

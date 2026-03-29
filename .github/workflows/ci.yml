@@ -60,15 +60,8 @@ jobs:
       - name: Unit Tests
         run: xvfb-run -a pnpm run test:unit
 
-      - name: Oxlint LSP Tests
-        run: xvfb-run -a pnpm run test:oxlint && xvfb-run -a pnpm run test:oxlint-multi-root
-
-      - name: Oxlint JS Plugin Test (flaky)
-        continue-on-error: true
-        run: xvfb-run -a pnpm run test:oxlint-js
-
-      - name: Oxfmt LSP Tests
-        run: xvfb-run -a pnpm run test:oxfmt
+      - name: Biome LSP Tests
+        run: xvfb-run -a pnpm run test:biome
 
   test-windows:
     if: ${{ github.ref_name == 'main' }}
@@ -92,12 +85,5 @@ jobs:
       - name: Unit Tests
         run: pnpm run test:unit
 
-      - name: Oxlint LSP Tests
-        run: pnpm run test:oxlint && pnpm run test:oxlint-multi-root
-
-      - name: Oxlint JS Plugin Test (flaky)
-        continue-on-error: true
-        run: pnpm run test:oxlint-js
-
-      - name: Oxfmt LSP Tests
-        run: pnpm run test:oxfmt
+      - name: Biome LSP Tests
+        run: pnpm run test:biome

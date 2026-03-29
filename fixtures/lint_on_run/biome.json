@@ -1,5 +1,9 @@
 {
-  "rules": {
-    "unicorn/no-empty-file": "off"
+  "linter": {
+    "rules": {
+      "style": {
+        "useBlockStatements": "off"
+      }
+    }
   }
 }
