@@ -1,6 +1,5 @@
 import {
   type ConfigurationChangeEvent,
-  ConfigurationTarget,
   type WorkspaceFolder,
   workspace,
 } from "vscode";
@@ -13,7 +12,7 @@ export const biomeConfigDefaultFilePattern = "**/{biome.json,biome.jsonc}";
  * This interface defines the configuration sent between the VS Code extension and the LSP.
  * Extension configuration is handled by `VSCodeConfig`.
  */
-interface WorkspaceConfigInterface {
+export interface BiomeWorkspaceConfigInterface {
   /**
    * biome config path
    * `biome.configPath`
@@ -31,14 +30,15 @@ interface WorkspaceConfigInterface {
    * `biome.disableNestedConfig`
    */
   disableNestedConfig?: boolean;
+
+  /**
+   * Any other settings under the 'biome' namespace.
+   */
+  [key: string]: unknown;
 }
 
-export type BiomeWorkspaceConfigInterface = WorkspaceConfigInterface;
-
 export class WorkspaceConfig {
-  private _configPath: string | null = null;
-  private _runTrigger: DiagnosticPullMode = DiagnosticPullMode.onType;
-  private _disableNestedConfig: boolean = false;
+  private _config: BiomeWorkspaceConfigInterface = {};
 
   constructor(private readonly workspace: WorkspaceFolder) {
     this.refresh();
@@ -49,13 +49,24 @@ export class WorkspaceConfig {
   }
 
   public refresh(): void {
-    this._runTrigger =
-      this.configuration.get<DiagnosticPullMode>("lint.run") ||
-      DiagnosticPullMode.onType;
-    this._configPath =
-      this.configuration.get<string | null>("configPath") ?? null;
-    this._disableNestedConfig =
-      this.configuration.get<boolean>("disableNestedConfig") ?? false;
+    const config = this.configuration;
+
+    // Explicitly pull known settings for backwards compatibility and clarity
+    const run = config.get<DiagnosticPullMode>("lint.run") || DiagnosticPullMode.onType;
+    const configPath = config.get<string | null>("configPath") ?? null;
+    const disableNestedConfig = config.get<boolean>("disableNestedConfig") ?? false;
+
+    // We build the config object. To be truly dynamic, we'd iterate over all 'biome.*' keys,
+    // but VS Code's getConfiguration doesn't make it easy without knowing the keys beforehand.
+    // However, the LSP client will handle the 'configuration' request which calls this.
+
+    this._config = {
+      run,
+      configPath,
+      disableNestedConfig,
+      // In the future, if we add more settings to package.json, we can add them here
+      // or we can try to automate it if we have a list of all settings.
+    };
   }
 
   public effectsConfigChange(event: ConfigurationChangeEvent): boolean {
@@ -68,15 +79,15 @@ export class WorkspaceConfig {
   }
 
   get runTrigger(): DiagnosticPullMode {
-    return this._runTrigger;
+    return (this._config.run as DiagnosticPullMode) || DiagnosticPullMode.onType;
   }
 
   get configPath(): string | null {
-    return this._configPath;
+    return (this._config.configPath as string | null) ?? null;
   }
 
   get disableNestedConfig(): boolean {
-    return this._disableNestedConfig;
+    return (this._config.disableNestedConfig as boolean) ?? false;
   }
 
   public shouldRequestDiagnostics(
@@ -86,10 +97,6 @@ export class WorkspaceConfig {
   }
 
   public toBiomeConfig(): BiomeWorkspaceConfigInterface {
-    return {
-      configPath: this.configPath,
-      run: this.runTrigger,
-      disableNestedConfig: this.disableNestedConfig,
-    };
+    return this._config;
   }
 }

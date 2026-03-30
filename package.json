@@ -77,6 +77,11 @@
         "command": "biome.copyDebugInfo",
         "title": "Copy Debug Info",
         "category": "Biome"
+      },
+      {
+        "command": "biome.rage",
+        "title": "Rage (Debug Info)",
+        "category": "Biome"
       }
     ],
     "configuration": {
@@ -160,7 +165,7 @@
           "biome.json",
           "biome.jsonc"
         ],
-        "url": "https://biomejs.dev/schemas/1.9.0/schema.json"
+        "url": "https://biomejs.dev/schemas/2.4.9/schema.json"
       }
     ],
     "languages": [

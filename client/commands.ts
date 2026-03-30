@@ -1,7 +1,8 @@
 import { execFile } from "node:child_process";
 import * as os from "node:os";
-import { env, version, window } from "vscode";
+import { env, version, window, type LogOutputChannel } from "vscode";
 import type { VSCodeConfig } from "./VSCodeConfig";
+import type { BinarySearchResult } from "./findBinary";
 
 const commandPrefix = "biome";
 
@@ -11,6 +12,7 @@ export enum BiomeCommands {
   ToggleEnableLint = "biome.toggleEnable",
   ApplyAllFixesFile = "biome.applyAllFixesFile",
   CopyDebugInfo = "biome.copyDebugInfo",
+  Rage = "biome.rage",
 }
 
 export enum LspCommands {
@@ -32,17 +34,58 @@ export async function copyDebugCommand(
   const info = [
     "### Used Versions",
     "",
-    "```",
+    "\\`\\`\\`\\`",
     `VS Code extension: v${extensionVersion}`,
     `biome: v${biomeVersion}`,
     `Editor: ${env.appName} v${version} (${env.appHost})`,
     `Operating System and Version: ${osName} (${os.release()})`,
     `Node Version: ${nodeVersion} (${nodeCommand})`,
-    "```",
+    "\\`\\`\\`\\`",
   ].join("\n");
 
   await env.clipboard.writeText(info);
   window.showInformationMessage("Debug info copied to clipboard.");
+}
+
+/**
+ * Executes 'biome rage' and prints the output to a channel.
+ */
+export async function rageCommand(
+  binary: BinarySearchResult | undefined,
+  outputChannel: LogOutputChannel,
+  vscodeConfig: VSCodeConfig,
+) {
+  if (!binary) {
+    window.showErrorMessage("Biome binary not found. Cannot run 'rage'.");
+    return;
+  }
+
+  const nodeCommand = resolveNodeCommand(
+    vscodeConfig.nodePath,
+    vscodeConfig.useExecPath,
+  );
+
+  outputChannel.show();
+  outputChannel.info("Running 'biome rage'...");
+
+  const args = ["rage"];
+  const options = {
+    cwd: os.homedir(), // Or workspace root if possible
+    env: { ...process.env },
+  };
+
+  execFile(binary.path, args, options, (error, stdout, stderr) => {
+    if (error) {
+      outputChannel.error(`'biome rage' failed: ${error.message}`);
+      if (stderr) {
+        outputChannel.error(stderr);
+      }
+      return;
+    }
+    outputChannel.info("--- Biome Rage Output ---");
+    outputChannel.info(stdout);
+    outputChannel.info("--- End of Output ---");
+  });
 }
 
 function getNodeVersion(nodeCommand: string): Promise<string> {
