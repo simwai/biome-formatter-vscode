@@ -16,7 +16,7 @@ import {
   ShowMessageNotification,
 } from "vscode-languageclient/node";
 import { ConfigService } from "../ConfigService";
-import { BiomeCommands, LspCommands } from "../commands";
+import { BiomeCommands, LspCommands, rageCommand } from "../commands";
 import type { BinarySearchResult } from "../findBinary";
 import type StatusBarItemHandler from "../StatusBarItemHandler";
 import { biomeConfigDefaultFilePattern } from "../WorkspaceConfig";
@@ -113,6 +113,17 @@ export default class BiomeTool implements ToolInterface {
       },
     );
 
+    const rage = commands.registerCommand(
+      BiomeCommands.Rage,
+      async () => {
+        await rageCommand(
+          await this.getBinary(outputChannel, configService),
+          outputChannel,
+          configService.vsCodeConfig,
+        );
+      },
+    );
+
     const run: Executable = runExecutable(
       binary,
       configService.vsCodeConfig.useExecPath,
@@ -124,14 +135,22 @@ export default class BiomeTool implements ToolInterface {
 
     const clientOptions: LanguageClientOptions = {
       documentSelector: [
-        { language: "javascript", scheme: "file" },
-        { language: "typescript", scheme: "file" },
-        { language: "javascriptreact", scheme: "file" },
-        { language: "typescriptreact", scheme: "file" },
-        { language: "json", scheme: "file" },
-        { language: "jsonc", scheme: "file" },
+        { language: "astro", scheme: "file" },
         { language: "css", scheme: "file" },
         { language: "graphql", scheme: "file" },
+        { language: "html", scheme: "file" },
+        { language: "javascript", scheme: "file" },
+        { language: "javascriptreact", scheme: "file" },
+        { language: "json", scheme: "file" },
+        { language: "jsonc", scheme: "file" },
+        { language: "less", scheme: "file" },
+        { language: "markdown", scheme: "file" },
+        { language: "mdx", scheme: "file" },
+        { language: "scss", scheme: "file" },
+        { language: "svelte", scheme: "file" },
+        { language: "typescript", scheme: "file" },
+        { language: "typescriptreact", scheme: "file" },
+        { language: "vue", scheme: "file" },
       ],
       initializationOptions: configService.biomeServerConfig,
       outputChannel,
@@ -175,6 +194,7 @@ export default class BiomeTool implements ToolInterface {
       restartCommand.dispose();
       toggleEnable.dispose();
       applyAllFixesFile.dispose();
+      rage.dispose();
       onNotificationDispose.dispose();
     };
 
