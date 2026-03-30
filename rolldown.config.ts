@@ -2,7 +2,9 @@ import { defineConfig, type RolldownOptions } from "rolldown";
 import { globSync } from "tinyglobby";
 
 const input: RolldownOptions["input"] =
-  process.env.TEST === "true" ? globSync("tests/**/*.ts") : ["client/extension.ts"];
+  process.env.TEST === "true"
+    ? globSync("tests/**/*.ts")
+    : ["client/extension.ts"];
 
 const output: RolldownOptions["output"] = {
   sourcemap: true,

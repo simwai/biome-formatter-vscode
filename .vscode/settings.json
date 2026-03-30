@@ -1,8 +1,4 @@
 {
-  "biome.configPath": "biome.config.json",
-  "biome.configPath": "biome.config.json",
-  "biome.typeAware": true,
-  "biome.unusedDisableDirectives": "deny",
   "editor.defaultFormatter": "simwai.biome-vscode",
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file", // biome can only format whole files

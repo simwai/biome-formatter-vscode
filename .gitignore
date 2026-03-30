@@ -11,9 +11,7 @@ out_test/
 /tests/test_workspace/
 /tests/test_workspace_second/
 /tests/*.test.code-workspace
-
-# Downloaded assets
-icon.png
+.vscode-test
 
 # Rust
 vscode_docs/target/
