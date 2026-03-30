@@ -4,21 +4,30 @@
     "enabled": false
   },
   "files": {
-    "ignoreUnknown": false
+    "ignoreUnknown": false,
+    "ignore": ["out/**", "biome_formatter.vsix", "node_modules/**"]
   },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space"
+    "indentStyle": "space",
+    "lineWidth": 80
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "style": {
+        "useConst": "error"
+      },
+      "suspicious": {
+        "noDebugger": "error"
+      }
     }
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double"
+      "quoteStyle": "double",
+      "trailingCommas": "all"
     }
   }
 }
