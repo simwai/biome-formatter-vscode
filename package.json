@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/simwai/biome-vscode"
+    "url": "https://github.com/simwai/biome-formatter-vscode"
   },
   "publisher": "simwai",
   "main": "./out/main.js",
