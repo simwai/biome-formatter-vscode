@@ -33,7 +33,6 @@
     "install-extension": "code --install-extension biome_formatter.vsix --force",
     "test": "cross-env TEST=true pnpm run compile && vscode-test",
     "test:unit": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=unit vscode-test",
-    "test:biome": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=biome-lsp vscode-test",
     "lint": "biome lint",
     "fmt": "biome format --write"
   },

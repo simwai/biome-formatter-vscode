@@ -4,15 +4,14 @@ import { DiagnosticPullMode } from "vscode-languageclient";
 import { WorkspaceConfig } from "../../client/WorkspaceConfig.js";
 import { WORKSPACE_FOLDER } from "../test-helpers.js";
 
-const keys = [
-  "lint.run",
-  "configPath",
-  "disableNestedConfig",
-];
+const keys = ["lint.run", "configPath", "disableNestedConfig"];
 
 suite("WorkspaceConfig", () => {
   const updateConfiguration = async (key: string, value: unknown) => {
-    const workspaceConfig = workspace.getConfiguration("biome", WORKSPACE_FOLDER);
+    const workspaceConfig = workspace.getConfiguration(
+      "biome",
+      WORKSPACE_FOLDER,
+    );
     await workspaceConfig.update(key, value);
   };
 

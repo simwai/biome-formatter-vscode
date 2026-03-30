@@ -10,7 +10,10 @@ suite("ConfigService", () => {
 
     strictEqual(serverConfigs.length, workspace.workspaceFolders?.length ?? 0);
     if (serverConfigs.length > 0) {
-        strictEqual(serverConfigs[0].workspaceUri, workspace.workspaceFolders![0].uri.toString());
+      strictEqual(
+        serverConfigs[0].workspaceUri,
+        workspace.workspaceFolders![0].uri.toString(),
+      );
     }
   });
 });
