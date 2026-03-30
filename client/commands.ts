@@ -1,8 +1,8 @@
 import { execFile } from "node:child_process";
 import * as os from "node:os";
-import { env, version, window, type LogOutputChannel } from "vscode";
-import type { VSCodeConfig } from "./VSCodeConfig";
+import { env, type LogOutputChannel, version, window } from "vscode";
 import type { BinarySearchResult } from "./findBinary";
+import type { VSCodeConfig } from "./VSCodeConfig";
 
 const commandPrefix = "biome";
 

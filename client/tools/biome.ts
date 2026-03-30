@@ -113,16 +113,13 @@ export default class BiomeTool implements ToolInterface {
       },
     );
 
-    const rage = commands.registerCommand(
-      BiomeCommands.Rage,
-      async () => {
-        await rageCommand(
-          await this.getBinary(outputChannel, configService),
-          outputChannel,
-          configService.vsCodeConfig,
-        );
-      },
-    );
+    const rage = commands.registerCommand(BiomeCommands.Rage, async () => {
+      await rageCommand(
+        await this.getBinary(outputChannel, configService),
+        outputChannel,
+        configService.vsCodeConfig,
+      );
+    });
 
     const run: Executable = runExecutable(
       binary,

@@ -52,9 +52,11 @@ export class WorkspaceConfig {
     const config = this.configuration;
 
     // Explicitly pull known settings for backwards compatibility and clarity
-    const run = config.get<DiagnosticPullMode>("lint.run") || DiagnosticPullMode.onType;
+    const run =
+      config.get<DiagnosticPullMode>("lint.run") || DiagnosticPullMode.onType;
     const configPath = config.get<string | null>("configPath") ?? null;
-    const disableNestedConfig = config.get<boolean>("disableNestedConfig") ?? false;
+    const disableNestedConfig =
+      config.get<boolean>("disableNestedConfig") ?? false;
 
     // We build the config object. To be truly dynamic, we'd iterate over all 'biome.*' keys,
     // but VS Code's getConfiguration doesn't make it easy without knowing the keys beforehand.
@@ -79,7 +81,9 @@ export class WorkspaceConfig {
   }
 
   get runTrigger(): DiagnosticPullMode {
-    return (this._config.run as DiagnosticPullMode) || DiagnosticPullMode.onType;
+    return (
+      (this._config.run as DiagnosticPullMode) || DiagnosticPullMode.onType
+    );
   }
 
   get configPath(): string | null {

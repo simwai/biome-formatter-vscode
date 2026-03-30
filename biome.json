@@ -5,29 +5,25 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["out/**", "biome_formatter.vsix", "node_modules/**"]
+    "experimentalScannerIgnores": [
+      "out/**",
+      "biome_formatter.vsix",
+      "node_modules/**"
+    ]
   },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space",
-    "lineWidth": 80
+    "indentStyle": "space"
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "style": {
-        "useConst": "error"
-      },
-      "suspicious": {
-        "noDebugger": "error"
-      }
+      "recommended": true
     }
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double",
-      "trailingCommas": "all"
+      "quoteStyle": "double"
     }
   }
 }
