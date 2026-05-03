@@ -18,6 +18,7 @@ Install through the VS Code extensions marketplace by searching for `Biome Forma
 - **Unified LSP**: Provides both linting and formatting through a single connection.
 - **Extended Language Support**: Supports JavaScript, TypeScript, JSON, HTML, CSS, Astro, Svelte, Vue, Markdown, and more.
 - **Auto-fixes**: Command to fix all auto-fixable issues in a file.
+- **Monorepo & Multi-root Support**: Works seamlessly with multi-root workspaces and monorepos (supports nested `biome.json` files).
 
 ## Configuration
 
