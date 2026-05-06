@@ -3,18 +3,18 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "debug",
+      "script": "dev",
       "group": "build",
       "problemMatcher": ["$tsc"],
-      "label": "pnpm: debug"
+      "label": "pnpm: dev"
     },
     {
       "type": "npm",
-      "script": "dev",
+      "script": "watch",
       "group": "build",
       "problemMatcher": ["$tsc-watch"],
       "isBackground": true,
-      "label": "pnpm: dev"
+      "label": "pnpm: watch"
     }
   ]
 }
