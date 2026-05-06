@@ -8,7 +8,7 @@
       "runtimeExecutable": "${execPath}",
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "preLaunchTask": "pnpm: compile"
+      "preLaunchTask": "pnpm: debug"
     },
     {
       "name": "Extension Tests",
@@ -21,7 +21,7 @@
         "--disable-extensions"
       ],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "preLaunchTask": "pnpm: compile"
+      "preLaunchTask": "pnpm: debug"
     },
     {
       "name": "Watch + Debug",
@@ -31,7 +31,7 @@
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "sourceMaps": true,
-      "preLaunchTask": "pnpm: watch"
+      "preLaunchTask": "pnpm: dev"
     }
   ]
 }
