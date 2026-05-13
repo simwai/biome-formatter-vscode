@@ -16,7 +16,7 @@ import {
   ShowMessageNotification,
 } from "vscode-languageclient/node";
 import { ConfigService } from "../ConfigService";
-import { BiomeCommands, LspCommands, rageCommand, formatProjectCommand } from "../commands";
+import { BiomeCommands, LspCommands, rageCommand, formatProjectCommand, openConfigCommand } from "../commands";
 import type { BinarySearchResult } from "../findBinary";
 import type StatusBarItemHandler from "../StatusBarItemHandler";
 import { biomeConfigDefaultFilePattern } from "../WorkspaceConfig";
@@ -123,6 +123,13 @@ export default class BiomeTool implements ToolInterface {
       },
     );
 
+    const openConfig = commands.registerCommand(
+      BiomeCommands.OpenConfig,
+      async () => {
+        await openConfigCommand();
+      },
+    );
+
     const rage = commands.registerCommand(BiomeCommands.Rage, async () => {
       await rageCommand(
         await this.getBinary(outputChannel, configService),
@@ -182,14 +189,20 @@ export default class BiomeTool implements ToolInterface {
       },
     );
 
+    const onActiveEditorChangeDispose = window.onDidChangeActiveTextEditor(() => {
+        this.updateStatusBar(statusBarItemHandler, configService);
+    });
+
     this.disposeResources = async () => {
       await this.client?.dispose();
       restartCommand.dispose();
       toggleEnable.dispose();
       applyAllFixesFile.dispose();
       formatProject.dispose();
+      openConfig.dispose();
       rage.dispose();
       onNotificationDispose.dispose();
+      onActiveEditorChangeDispose.dispose();
     };
 
     if (this.allowedToStartServer && configService.vsCodeConfig.enableBiome) {
@@ -275,11 +288,18 @@ export default class BiomeTool implements ToolInterface {
       text += `[$(play) Start Server](command:${BiomeCommands.ToggleEnableLint})\n\n`;
     }
 
+    const activeEditor = window.activeTextEditor;
+    let isFileActive = false;
+    if (activeEditor && isEnabled) {
+       isFileActive = configService.vsCodeConfig.enabledLanguages.includes(activeEditor.document.languageId);
+    }
+
     statusBarItemHandler.updateTool(
       "biome",
       isEnabled,
       text,
       this.client?.initializeResult?.serverInfo?.version,
+      isFileActive
     );
   }
 }

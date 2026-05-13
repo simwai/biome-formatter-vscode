@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import * as os from "node:os";
 import * as path from "node:path";
-import { env, type LogOutputChannel, version, window, workspace } from "vscode";
+import { env, type LogOutputChannel, version, window, workspace, Uri } from "vscode";
 import type { BinarySearchResult } from "./findBinary";
 import type { VSCodeConfig } from "./VSCodeConfig";
 
@@ -13,6 +13,7 @@ export enum BiomeCommands {
   ToggleEnableLint = "biome.toggleEnable",
   ApplyAllFixesFile = "biome.applyAllFixesFile",
   FormatProject = "biome.formatProject",
+  OpenConfig = "biome.openConfig",
   CopyDebugInfo = "biome.copyDebugInfo",
   Rage = "biome.rage",
 }
@@ -224,6 +225,54 @@ export async function formatProjectCommand(
     }
     window.showInformationMessage("Project formatted successfully.");
   });
+}
+
+/**
+ * Opens the Biome configuration file relevant to the active editor.
+ */
+export async function openConfigCommand() {
+  const activeEditor = window.activeTextEditor;
+  const workspaceFolder = activeEditor
+    ? workspace.getWorkspaceFolder(activeEditor.document.uri)
+    : workspace.workspaceFolders?.[0];
+
+  if (!workspaceFolder) {
+    window.showErrorMessage("No workspace folder found.");
+    return;
+  }
+
+  // Look for biome configuration files in the current folder or above
+  const configFiles = [
+    "biome.json",
+    "biome.jsonc",
+    ".biome.json",
+    ".biome.jsonc"
+  ];
+
+  let currentPath = activeEditor
+    ? path.dirname(activeEditor.document.uri.fsPath)
+    : workspaceFolder.uri.fsPath;
+
+  const workspaceRoot = workspaceFolder.uri.fsPath;
+
+  while (currentPath.startsWith(workspaceRoot)) {
+    for (const configFile of configFiles) {
+      const configUri = Uri.file(path.join(currentPath, configFile));
+      try {
+        await workspace.fs.stat(configUri);
+        const doc = await workspace.openTextDocument(configUri);
+        await window.showTextDocument(doc);
+        return;
+      } catch {
+        // Continue
+      }
+    }
+    const parentPath = path.dirname(currentPath);
+    if (parentPath === currentPath) break;
+    currentPath = parentPath;
+  }
+
+  window.showErrorMessage("Biome configuration file not found.");
 }
 
 function getNodeVersion(nodeCommand: string): Promise<string> {

@@ -96,6 +96,11 @@
         "category": "Biome"
       },
       {
+        "command": "biome.openConfig",
+        "title": "Open Biome Configuration",
+        "category": "Biome"
+      },
+      {
         "command": "biome.copyDebugInfo",
         "title": "Copy Debug Info",
         "category": "Biome"

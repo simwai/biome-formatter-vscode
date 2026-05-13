@@ -16,6 +16,7 @@ Install through the VS Code extensions marketplace by searching for `Biome Forma
 - **Extended Language Support**: Supports JavaScript, TypeScript, JSON, HTML, CSS, Astro, Svelte, Vue, Markdown, and more.
 - **Auto-fixes**: Command to fix all auto-fixable issues in a file.
 - **Format Project**: Command to format the full project using the Biome CLI.
+- **Status Bar Integration**: A mini status bar item shows if Biome is active on the current file. Click it to open your Biome configuration.
 - **Monorepo & Multi-root Support**: Works seamlessly with multi-root workspaces and monorepos (supports nested `biome.json`, `biome.jsonc`, `.biome.json`, or `.biome.jsonc` files).
 
 ## Configuration
@@ -40,6 +41,7 @@ This extension provides several commands accessible via the Command Palette (`Ct
 - **Biome: Show Output Channel**: View the logs from the Biome LSP.
 - **Biome: Fix all auto-fixable problems (file)**: Applies all suggested fixes to the current file.
 - **Biome: Format Project**: Runs `biome format --write .` in the active workspace. If it fails, output is shown in a terminal.
+- **Biome: Open Biome Configuration**: Opens the relevant `biome.json` file for the current project.
 - **Biome: Copy Debug Info**: Copies environment and version information to the clipboard.
 - **Biome: Rage (Debug Info)**: Generates a detailed diagnostic report.
 
@@ -65,6 +67,7 @@ While the official Biome extension (`biomejs.biome`) is the recommended choice f
 | **Settings Prefix** | `biome.enable`, `biome.configPath` | `biome.enabled`, `biome.configurationPath` |
 | **Languages**       | Broad (Astro, Svelte, Vue, etc.)   | Standard JS/TS/JSON                        |
 | **Diagnostics**     | Includes `biome.rage` command      | Standard LSP diagnostics                   |
+| **Status Bar**      | File-specific activation status    | Global server status                       |
 | **Status**          | Experimental                       | Stable                                     |
 
 ## Contributing
