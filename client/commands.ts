@@ -21,6 +21,7 @@ export enum BiomeCommands {
   ApplyAllFixesFile = "biome.applyAllFixesFile",
   FormatProject = "biome.formatProject",
   FixProject = "biome.fixProject",
+  FixProjectUnsafe = "biome.fixProjectUnsafe",
   OpenConfig = "biome.openConfig",
   CopyDebugInfo = "biome.copyDebugInfo",
   Rage = "biome.rage",
@@ -271,6 +272,22 @@ export async function fixProjectCommand(
     ["check", "--write", "."],
     "Fix Project",
     "Project fixed successfully.",
+  );
+}
+
+/**
+ * Executes 'biome check --write --unsafe .' in the active workspace.
+ */
+export async function fixProjectUnsafeCommand(
+  binary: BinarySearchResult | undefined,
+  vscodeConfig: VSCodeConfig,
+) {
+  await runBiomeOnProject(
+    binary,
+    vscodeConfig,
+    ["check", "--write", "--unsafe", "."],
+    "Fix Project (Unsafe)",
+    "Project fixed (with unsafe fixes) successfully.",
   );
 }
 

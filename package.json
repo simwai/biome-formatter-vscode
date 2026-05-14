@@ -101,6 +101,11 @@
         "category": "Biome"
       },
       {
+        "command": "biome.fixProjectUnsafe",
+        "title": "Fix Project (Unsafe)",
+        "category": "Biome"
+      },
+      {
         "command": "biome.openConfig",
         "title": "Open Biome Configuration",
         "category": "Biome"

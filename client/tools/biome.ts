@@ -19,6 +19,7 @@ import { ConfigService } from "../ConfigService";
 import {
   BiomeCommands,
   fixProjectCommand,
+  fixProjectUnsafeCommand,
   formatProjectCommand,
   LspCommands,
   openConfigCommand,
@@ -140,6 +141,16 @@ export default class BiomeTool implements ToolInterface {
       },
     );
 
+    const fixProjectUnsafe = commands.registerCommand(
+      BiomeCommands.FixProjectUnsafe,
+      async () => {
+        await fixProjectUnsafeCommand(
+          await this.getBinary(outputChannel, configService),
+          configService.vsCodeConfig,
+        );
+      },
+    );
+
     const openConfig = commands.registerCommand(
       BiomeCommands.OpenConfig,
       async () => {
@@ -221,6 +232,7 @@ export default class BiomeTool implements ToolInterface {
       applyAllFixesFile.dispose();
       formatProject.dispose();
       fixProject.dispose();
+      fixProjectUnsafe.dispose();
       openConfig.dispose();
       rage.dispose();
       onNotificationDispose.dispose();
