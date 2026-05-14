@@ -16,7 +16,14 @@ import {
   ShowMessageNotification,
 } from "vscode-languageclient/node";
 import { ConfigService } from "../ConfigService";
-import { BiomeCommands, LspCommands, rageCommand, formatProjectCommand, openConfigCommand } from "../commands";
+import {
+  BiomeCommands,
+  fixProjectCommand,
+  formatProjectCommand,
+  LspCommands,
+  openConfigCommand,
+  rageCommand,
+} from "../commands";
 import type { BinarySearchResult } from "../findBinary";
 import type StatusBarItemHandler from "../StatusBarItemHandler";
 import { biomeConfigDefaultFilePattern } from "../WorkspaceConfig";
@@ -123,6 +130,16 @@ export default class BiomeTool implements ToolInterface {
       },
     );
 
+    const fixProject = commands.registerCommand(
+      BiomeCommands.FixProject,
+      async () => {
+        await fixProjectCommand(
+          await this.getBinary(outputChannel, configService),
+          configService.vsCodeConfig,
+        );
+      },
+    );
+
     const openConfig = commands.registerCommand(
       BiomeCommands.OpenConfig,
       async () => {
@@ -148,10 +165,12 @@ export default class BiomeTool implements ToolInterface {
     outputChannel.info(`Using server binary at: ${binary?.path}`);
 
     const clientOptions: LanguageClientOptions = {
-      documentSelector: configService.vsCodeConfig.enabledLanguages.map((language) => ({
-        language,
-        scheme: "file",
-      })),
+      documentSelector: configService.vsCodeConfig.enabledLanguages.map(
+        (language) => ({
+          language,
+          scheme: "file",
+        }),
+      ),
       initializationOptions: configService.biomeServerConfig,
       outputChannel,
       traceOutputChannel: outputChannel,
@@ -189,9 +208,11 @@ export default class BiomeTool implements ToolInterface {
       },
     );
 
-    const onActiveEditorChangeDispose = window.onDidChangeActiveTextEditor(() => {
+    const onActiveEditorChangeDispose = window.onDidChangeActiveTextEditor(
+      () => {
         this.updateStatusBar(statusBarItemHandler, configService);
-    });
+      },
+    );
 
     this.disposeResources = async () => {
       await this.client?.dispose();
@@ -199,6 +220,7 @@ export default class BiomeTool implements ToolInterface {
       toggleEnable.dispose();
       applyAllFixesFile.dispose();
       formatProject.dispose();
+      fixProject.dispose();
       openConfig.dispose();
       rage.dispose();
       onNotificationDispose.dispose();
@@ -291,7 +313,9 @@ export default class BiomeTool implements ToolInterface {
     const activeEditor = window.activeTextEditor;
     let isFileActive = false;
     if (activeEditor && isEnabled) {
-       isFileActive = configService.vsCodeConfig.enabledLanguages.includes(activeEditor.document.languageId);
+      isFileActive = configService.vsCodeConfig.enabledLanguages.includes(
+        activeEditor.document.languageId,
+      );
     }
 
     statusBarItemHandler.updateTool(
@@ -299,7 +323,7 @@ export default class BiomeTool implements ToolInterface {
       isEnabled,
       text,
       this.client?.initializeResult?.serverInfo?.version,
-      isFileActive
+      isFileActive,
     );
   }
 }
