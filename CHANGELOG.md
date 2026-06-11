@@ -1,3 +1,10 @@
+# [1.54.0](https://github.com/simwai/biome-formatter-vscode/compare/v1.53.0...v1.54.0) (2026-06-11)
+
+
+### Features
+
+* add comprehensive .env.example ([#19](https://github.com/simwai/biome-formatter-vscode/issues/19)) ([f48acb7](https://github.com/simwai/biome-formatter-vscode/commit/f48acb7fd57e7dba3b977b1be6ee1c7aa4170db2))
+
 # [1.53.0](https://github.com/simwai/biome-formatter-vscode/compare/v1.52.0...v1.53.0) (2026-05-29)
 
 
