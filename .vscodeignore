@@ -3,4 +3,6 @@
 !LICENSE
 !out/main.js
 !package.json
-!README.md
+!README.md!out/strict_template.json
+!biome_schema.json
+!client/webview/index.html

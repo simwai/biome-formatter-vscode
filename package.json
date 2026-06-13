@@ -119,6 +119,16 @@
         "command": "biome.rage",
         "title": "Rage (Debug Info)",
         "category": "Biome"
+      },
+      {
+        "command": "biome.addCustomConfig",
+        "title": "Add Custom Config",
+        "category": "Biome"
+      },
+      {
+        "command": "biome.spawnConfig",
+        "title": "Spawn Config",
+        "category": "Biome"
       }
     ],
     "configuration": {
@@ -271,7 +281,9 @@
     "onCommand:biome.fixProjectUnsafe",
     "onCommand:biome.openConfig",
     "onCommand:biome.copyDebugInfo",
-    "onCommand:biome.rage"
+    "onCommand:biome.rage",
+    "onCommand:biome.addCustomConfig",
+    "onCommand:biome.spawnConfig"
   ],
   "icon": "icon.png",
   "engines": {
