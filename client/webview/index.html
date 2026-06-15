@@ -14,119 +14,188 @@
             --btn-bg: var(--vscode-button-background);
             --btn-fg: var(--vscode-button-foreground);
             --btn-hover: var(--vscode-button-hoverBackground);
+            --secondary-btn-bg: var(--vscode-button-secondaryBackground);
+            --secondary-btn-fg: var(--vscode-button-secondaryForeground);
+            --secondary-btn-hover: var(--vscode-button-secondaryHoverBackground);
             --error-fg: var(--vscode-errorForeground);
             --card-bg: var(--vscode-sideBar-background);
             --card-border: var(--vscode-widget-border, #3c3c3c);
+            --focus-border: var(--vscode-focusBorder);
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", Monaco, Consolas, "Ubuntu Mono", "Courier New", monospace;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             background-color: var(--bg);
             color: var(--fg);
-            font-family: var(--vscode-font-family);
+            font-family: var(--font-sans);
+            line-height: 1.5;
             margin: 0;
-            padding: 16px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            align-items: center;
         }
 
+        /* Utility Classes */
+        .w-full { width: 100%; }
+        .max-w-3xl { max-width: 48rem; }
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
-        .gap-2 { gap: 8px; }
-        .gap-4 { gap: 16px; }
-        .p-4 { padding: 16px; }
-        .w-full { width: 100%; }
+        .flex-row { flex-direction: row; }
         .justify-between { justify-content: space-between; }
         .items-center { align-items: center; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+        .gap-6 { gap: 24px; }
+        .p-4 { padding: 16px; }
+        .p-6 { padding: 24px; }
+        .mt-4 { margin-top: 16px; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-6 { margin-bottom: 24px; }
         .hidden { display: none; }
+        .rounded-lg { border-radius: 8px; }
+        .border { border: 1px solid var(--card-border); }
+        .font-mono { font-family: var(--font-mono); }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .font-bold { font-weight: 700; }
+        .opacity-70 { opacity: 0.7; }
+        .cursor-pointer { cursor: pointer; }
 
+        h1 { font-size: 1.5rem; margin: 0; font-weight: 700; letter-spacing: -0.025em; }
+        h2 { font-size: 1.25rem; margin: 0; font-weight: 600; }
+
+        /* Component Styles */
         input, textarea {
             background-color: var(--input-bg);
             color: var(--input-fg);
             border: 1px solid var(--input-border);
-            padding: 8px;
-            border-radius: 4px;
+            padding: 12px;
+            border-radius: 6px;
             font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--focus-border);
         }
 
         textarea {
-            min-height: 300px;
+            min-height: 400px;
             resize: vertical;
-            font-family: var(--vscode-editor-font-family, monospace);
+            font-size: 13px;
+            line-height: 1.6;
         }
 
         button {
             background-color: var(--btn-bg);
             color: var(--btn-fg);
             border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: bold;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: background-color 0.15s ease, transform 0.1s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        button:hover {
-            background-color: var(--btn-hover);
+        button:hover { background-color: var(--btn-hover); }
+        button:active { transform: scale(0.98); }
+
+        button.secondary {
+            background-color: var(--secondary-btn-bg);
+            color: var(--secondary-btn-fg);
         }
+        button.secondary:hover { background-color: var(--secondary-btn-hover); }
 
         .card {
             background-color: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.1s;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .card:hover {
+            border-color: var(--focus-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transform: translateY(-2px);
-            border-color: var(--vscode-focusBorder);
         }
 
         .error-msg {
             color: var(--error-fg);
-            font-size: 0.9em;
-            margin-top: 4px;
+            background-color: rgba(255, 0, 0, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--error-fg);
+            font-size: 0.8rem;
+            margin-top: 8px;
+            white-space: pre-wrap;
         }
 
-        h1, h2 { margin: 0; }
-
-        .sticky-bottom {
+        .sticky-footer {
             position: sticky;
             bottom: 0;
             background-color: var(--bg);
-            padding: 16px 0;
+            padding: 20px 0;
             border-top: 1px solid var(--card-border);
+            margin-top: 24px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: var(--card-border);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--input-border); }
+
+        @media (max-width: 640px) {
+            body { padding: 16px; }
+            .sticky-footer { padding: 16px 0; }
         }
     </style>
 </head>
 <body>
-    <div id="picker-view" class="flex flex-col gap-4">
-        <h1>Biome Configs</h1>
-        <div id="config-list" class="flex flex-col gap-2">
+    <div id="picker-view" class="w-full max-w-3xl flex flex-col gap-6">
+        <div class="flex justify-between items-center mb-2">
+            <h1>Biome Configs</h1>
+            <button id="new-config-btn" class="secondary">+ New</button>
+        </div>
+        <div id="config-list" class="flex flex-col gap-4">
             <!-- Configs will be rendered here -->
         </div>
     </div>
 
-    <div id="editor-view" class="flex flex-col gap-4 hidden">
+    <div id="editor-view" class="w-full max-w-3xl flex flex-col gap-6 hidden">
         <div class="flex justify-between items-center">
-            <button id="back-btn">← Back</button>
+            <button id="back-btn" class="secondary">← Back</button>
             <h2 id="editor-title">Edit Config</h2>
-            <div></div>
+            <div style="width: 80px"></div>
         </div>
 
         <div class="flex flex-col gap-2">
-            <label for="config-name">Name</label>
-            <input type="text" id="config-name" placeholder="Untitled">
+            <label for="config-name" class="text-sm font-bold opacity-70">Configuration Name</label>
+            <input type="text" id="config-name" placeholder="e.g. My Perfect Biome">
         </div>
 
         <div class="flex flex-col gap-2">
-            <label for="config-content">Configuration (JSON)</label>
-            <textarea id="config-content" spellcheck="false"></textarea>
-            <div id="validation-error" class="error-msg"></div>
+            <label for="config-content" class="text-sm font-bold opacity-70">Configuration (JSON)</label>
+            <textarea id="config-content" class="font-mono" spellcheck="false"></textarea>
+            <div id="validation-error" class="error-msg hidden"></div>
         </div>
 
-        <div class="sticky-bottom flex gap-2">
-            <button id="spawn-btn" class="w-full">Spawn into Workspace</button>
+        <div class="sticky-footer flex gap-4">
+            <button id="spawn-btn" class="w-full p-4">Spawn into Workspace</button>
         </div>
     </div>
 
@@ -143,8 +212,8 @@
         const validationError = document.getElementById('validation-error');
         const spawnBtn = document.getElementById('spawn-btn');
         const backBtn = document.getElementById('back-btn');
+        const newBtn = document.getElementById('new-config-btn');
 
-        // Listen for messages from the extension
         window.addEventListener('message', event => {
             const message = event.data;
             switch (message.command) {
@@ -160,14 +229,16 @@
         function renderConfigs(configs, strictTemplate) {
             configList.innerHTML = '';
 
-            // Add Strict Default Template at the top
-            const defaultCard = createCard('Strict Default Template (Built-in)', 'Read-only base template', () => {
+            const defaultCard = createCard('Strict Default Template', 'Built-in base with all recommended rules set to error', () => {
                 vscode.postMessage({ command: 'editConfig', id: 'default', isDefault: true });
-            });
+            }, true);
             configList.appendChild(defaultCard);
 
             configs.forEach(config => {
-                const card = createCard(config.name, `Last updated: ${new Date(config.updatedAt).toLocaleString()}`, () => {
+                const date = new Date(config.updatedAt).toLocaleDateString(undefined, {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                const card = createCard(config.name, `Updated ${date}`, () => {
                     vscode.postMessage({ command: 'editConfig', id: config.id, isDefault: false });
                 });
                 configList.appendChild(card);
@@ -177,10 +248,15 @@
             editorView.classList.add('hidden');
         }
 
-        function createCard(title, sub, onClick) {
+        function createCard(title, sub, onClick, isSpecial = false) {
             const div = document.createElement('div');
-            div.className = 'card p-4 flex flex-col';
-            div.innerHTML = `<strong>${title}</strong><span style="font-size: 0.8em; opacity: 0.7">${sub}</span>`;
+            div.className = 'card p-6 flex flex-col gap-1 cursor-pointer';
+            if (isSpecial) div.style.borderLeft = '4px solid var(--focus-border)';
+
+            div.innerHTML = `
+                <div class="font-bold">${title}</div>
+                <div class="text-xs opacity-70">${sub}</div>
+            `;
             div.onclick = onClick;
             return div;
         }
@@ -194,7 +270,7 @@
 
             if (isDefault) {
                 configName.disabled = true;
-                document.getElementById('editor-title').innerText = 'Base Template';
+                document.getElementById('editor-title').innerText = 'Strict Template';
             } else {
                 configName.disabled = false;
                 document.getElementById('editor-title').innerText = 'Edit Config';
@@ -205,7 +281,6 @@
             validate();
         }
 
-        // Debounced Autosave
         let timeout;
         function debouncedSave() {
             if (isDefaultTemplate) return;
@@ -226,10 +301,11 @@
             const content = configContent.value;
             try {
                 JSON.parse(content);
-                validationError.innerText = '';
+                validationError.classList.add('hidden');
                 vscode.postMessage({ command: 'validate', content });
             } catch (e) {
                 validationError.innerText = 'Invalid JSON: ' + e.message;
+                validationError.classList.remove('hidden');
             }
         }
 
@@ -253,13 +329,17 @@
             vscode.postMessage({ command: 'refresh' });
         });
 
-        // Handle validation response from extension
+        newBtn.addEventListener('click', () => {
+            vscode.postMessage({ command: 'editConfig', id: Date.now().toString(), isDefault: false, isNew: true });
+        });
+
         window.addEventListener('message', event => {
             if (event.data.command === 'validationResult') {
                 if (event.data.errors && event.data.errors.length > 0) {
                     validationError.innerText = event.data.errors.join('\n');
+                    validationError.classList.remove('hidden');
                 } else {
-                    validationError.innerText = '';
+                    validationError.classList.add('hidden');
                 }
             }
         });

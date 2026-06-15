@@ -38,7 +38,7 @@ export class ConfigWebview {
                         this.renderConfigs();
                         break;
                     case 'editConfig':
-                        this.handleEditConfig(message.id, message.isDefault);
+                        this.handleEditConfig(message.id, message.isDefault, message.isNew);
                         break;
                     case 'saveConfig':
                         await this.handleSaveConfig(message.config);
