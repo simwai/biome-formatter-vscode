@@ -29,7 +29,7 @@
     "test:unit": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=unit vscode-test",
     "lint": "biome lint",
     "format": "biome check --write .",
-    "compile": "rolldown -c rolldown.config.ts && cp client/strict_template.json out/",
+    "compile": "rolldown -c rolldown.config.ts && bash -c \"cp ./client/strict_template.json ./out/\"",
     "package": "vsce package --no-dependencies -o biome_formatter.vsix",
     "start": "pnpm run watch",
     "watch": "pnpm run compile -- --watch",
