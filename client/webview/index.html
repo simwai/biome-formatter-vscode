@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biome Config Manager</title>
+    <style>
+        :root {
+            --bg: var(--vscode-editor-background);
+            --fg: var(--vscode-editor-foreground);
+            --input-bg: var(--vscode-input-background);
+            --input-fg: var(--vscode-input-foreground);
+            --input-border: var(--vscode-input-border, #3c3c3c);
+            --btn-bg: var(--vscode-button-background);
+            --btn-fg: var(--vscode-button-foreground);
+            --btn-hover: var(--vscode-button-hoverBackground);
+            --secondary-btn-bg: var(--vscode-button-secondaryBackground);
+            --secondary-btn-fg: var(--vscode-button-secondaryForeground);
+            --secondary-btn-hover: var(--vscode-button-secondaryHoverBackground);
+            --error-fg: var(--vscode-errorForeground);
+            --card-bg: var(--vscode-sideBar-background);
+            --card-border: var(--vscode-widget-border, #3c3c3c);
+            --focus-border: var(--vscode-focusBorder);
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", Monaco, Consolas, "Ubuntu Mono", "Courier New", monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Utility Classes */
+        .w-full { width: 100%; }
+        .max-w-3xl { max-width: 48rem; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-row { flex-direction: row; }
+        .justify-between { justify-content: space-between; }
+        .items-center { align-items: center; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+        .gap-6 { gap: 24px; }
+        .p-4 { padding: 16px; }
+        .p-6 { padding: 24px; }
+        .mt-4 { margin-top: 16px; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-6 { margin-bottom: 24px; }
+        .hidden { display: none; }
+        .rounded-lg { border-radius: 8px; }
+        .border { border: 1px solid var(--card-border); }
+        .font-mono { font-family: var(--font-mono); }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .font-bold { font-weight: 700; }
+        .opacity-70 { opacity: 0.7; }
+        .cursor-pointer { cursor: pointer; }
+
+        h1 { font-size: 1.5rem; margin: 0; font-weight: 700; letter-spacing: -0.025em; }
+        h2 { font-size: 1.25rem; margin: 0; font-weight: 600; }
+
+        /* Component Styles */
+        input, textarea {
+            background-color: var(--input-bg);
+            color: var(--input-fg);
+            border: 1px solid var(--input-border);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--focus-border);
+        }
+
+        textarea {
+            min-height: 400px;
+            resize: vertical;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        button {
+            background-color: var(--btn-bg);
+            color: var(--btn-fg);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: background-color 0.15s ease, transform 0.1s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover { background-color: var(--btn-hover); }
+        button:active { transform: scale(0.98); }
+
+        button.secondary {
+            background-color: var(--secondary-btn-bg);
+            color: var(--secondary-btn-fg);
+        }
+        button.secondary:hover { background-color: var(--secondary-btn-hover); }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card:hover {
+            border-color: var(--focus-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .error-msg {
+            color: var(--error-fg);
+            background-color: rgba(255, 0, 0, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--error-fg);
+            font-size: 0.8rem;
+            margin-top: 8px;
+            white-space: pre-wrap;
+        }
+
+        .sticky-footer {
+            position: sticky;
+            bottom: 0;
+            background-color: var(--bg);
+            padding: 20px 0;
+            border-top: 1px solid var(--card-border);
+            margin-top: 24px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: var(--card-border);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--input-border); }
+
+        @media (max-width: 640px) {
+            body { padding: 16px; }
+            .sticky-footer { padding: 16px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="picker-view" class="w-full max-w-3xl flex flex-col gap-6">
+        <div class="flex justify-between items-center mb-2">
+            <h1>Biome Configs</h1>
+            <button id="new-config-btn" class="secondary">+ New</button>
+        </div>
+        <div id="config-list" class="flex flex-col gap-4">
+            <!-- Configs will be rendered here -->
+        </div>
+    </div>
+
+    <div id="editor-view" class="w-full max-w-3xl flex flex-col gap-6 hidden">
+        <div class="flex justify-between items-center">
+            <button id="back-btn" class="secondary">← Back</button>
+            <h2 id="editor-title">Edit Config</h2>
+            <div style="width: 80px"></div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="config-name" class="text-sm font-bold opacity-70">Configuration Name</label>
+            <input type="text" id="config-name" placeholder="e.g. My Perfect Biome">
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="config-content" class="text-sm font-bold opacity-70">Configuration (JSON)</label>
+            <textarea id="config-content" class="font-mono" spellcheck="false"></textarea>
+            <div id="validation-error" class="error-msg hidden"></div>
+        </div>
+
+        <div class="sticky-footer flex gap-4">
+            <button id="spawn-btn" class="w-full p-4">Spawn into Workspace</button>
+        </div>
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+        let currentConfigId = null;
+        let isDefaultTemplate = false;
+
+        const pickerView = document.getElementById('picker-view');
+        const editorView = document.getElementById('editor-view');
+        const configList = document.getElementById('config-list');
+        const configName = document.getElementById('config-name');
+        const configContent = document.getElementById('config-content');
+        const validationError = document.getElementById('validation-error');
+        const spawnBtn = document.getElementById('spawn-btn');
+        const backBtn = document.getElementById('back-btn');
+        const newBtn = document.getElementById('new-config-btn');
+
+        window.addEventListener('message', event => {
+            const message = event.data;
+            switch (message.command) {
+                case 'renderConfigs':
+                    renderConfigs(message.configs, message.strictTemplate);
+                    break;
+                case 'openEditor':
+                    openEditor(message.config, message.isDefault);
+                    break;
+            }
+        });
+
+        function renderConfigs(configs, strictTemplate) {
+            configList.innerHTML = '';
+
+            const defaultCard = createCard('Strict Default Template', 'Built-in base with all recommended rules set to error', () => {
+                vscode.postMessage({ command: 'editConfig', id: 'default', isDefault: true });
+            }, true);
+            configList.appendChild(defaultCard);
+
+            configs.forEach(config => {
+                const date = new Date(config.updatedAt).toLocaleDateString(undefined, {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                const card = createCard(config.name, `Updated ${date}`, () => {
+                    vscode.postMessage({ command: 'editConfig', id: config.id, isDefault: false });
+                });
+                configList.appendChild(card);
+            });
+
+            pickerView.classList.remove('hidden');
+            editorView.classList.add('hidden');
+        }
+
+        function createCard(title, sub, onClick, isSpecial = false) {
+            const div = document.createElement('div');
+            div.className = 'card p-6 flex flex-col gap-1 cursor-pointer';
+            if (isSpecial) div.style.borderLeft = '4px solid var(--focus-border)';
+
+            div.innerHTML = `
+                <div class="font-bold">${title}</div>
+                <div class="text-xs opacity-70">${sub}</div>
+            `;
+            div.onclick = onClick;
+            return div;
+        }
+
+        function openEditor(config, isDefault) {
+            currentConfigId = config.id;
+            isDefaultTemplate = isDefault;
+
+            configName.value = config.name;
+            configContent.value = config.content;
+
+            if (isDefault) {
+                configName.disabled = true;
+                document.getElementById('editor-title').innerText = 'Strict Template';
+            } else {
+                configName.disabled = false;
+                document.getElementById('editor-title').innerText = 'Edit Config';
+            }
+
+            pickerView.classList.add('hidden');
+            editorView.classList.remove('hidden');
+            validate();
+        }
+
+        let timeout;
+        function debouncedSave() {
+            if (isDefaultTemplate) return;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                vscode.postMessage({
+                    command: 'saveConfig',
+                    config: {
+                        id: currentConfigId,
+                        name: configName.value,
+                        content: configContent.value
+                    }
+                });
+            }, 500);
+        }
+
+        function validate() {
+            const content = configContent.value;
+            try {
+                JSON.parse(content);
+                validationError.classList.add('hidden');
+                vscode.postMessage({ command: 'validate', content });
+            } catch (e) {
+                validationError.innerText = 'Invalid JSON: ' + e.message;
+                validationError.classList.remove('hidden');
+            }
+        }
+
+        configName.addEventListener('input', debouncedSave);
+        configContent.addEventListener('input', () => {
+            validate();
+            debouncedSave();
+        });
+
+        spawnBtn.addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'spawn',
+                config: {
+                    name: configName.value,
+                    content: configContent.value
+                }
+            });
+        });
+
+        backBtn.addEventListener('click', () => {
+            vscode.postMessage({ command: 'refresh' });
+        });
+
+        newBtn.addEventListener('click', () => {
+            vscode.postMessage({ command: 'editConfig', id: Date.now().toString(), isDefault: false, isNew: true });
+        });
+
+        window.addEventListener('message', event => {
+            if (event.data.command === 'validationResult') {
+                if (event.data.errors && event.data.errors.length > 0) {
+                    validationError.innerText = event.data.errors.join('\n');
+                    validationError.classList.remove('hidden');
+                } else {
+                    validationError.classList.add('hidden');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

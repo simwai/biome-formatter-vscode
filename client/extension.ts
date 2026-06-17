@@ -5,7 +5,9 @@ import {
   window,
   workspace,
 } from 'vscode'
+import { ConfigManager } from './ConfigManager'
 import { ConfigService } from './ConfigService'
+import { ConfigWebview } from './ConfigWebview'
 import {
   BiomeCommands,
   copyDebugCommand,
@@ -25,6 +27,7 @@ const tools: ToolInterface[] = []
 tools.push(new BiomeTool())
 
 export async function activate(context: ExtensionContext) {
+  const configManager = new ConfigManager(context.globalState)
   const configService = new ConfigService()
 
   const outputChannel = window.createOutputChannel(outputChannelName, {
@@ -140,7 +143,23 @@ export async function activate(context: ExtensionContext) {
     biomeTool.updateStatusBar(statusBarItemHandler, configService)
   })
 
+  const addCustomConfigCommand = commands.registerCommand(
+    BiomeCommands.AddCustomConfig,
+    () => {
+      ConfigWebview.render(context.extensionUri, configManager, 'editor')
+    },
+  )
+
+  const spawnConfigCommand = commands.registerCommand(
+    BiomeCommands.SpawnConfig,
+    () => {
+      ConfigWebview.render(context.extensionUri, configManager, 'picker')
+    },
+  )
+
   context.subscriptions.push(
+    addCustomConfigCommand,
+    spawnConfigCommand,
     showOutputCommand,
     restartServerCommand,
     toggleEnableCommand,
