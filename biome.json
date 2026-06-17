@@ -5,10 +5,13 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "experimentalScannerIgnores": [
-      "out",
-      "biome_formatter.vsix",
-      "node_modules"
+    "includes": [
+      "src",
+      "**/*",
+      "!!.vscode-test",
+      "!!node_modules",
+      "!!**/*.vsix",
+      "!!*out*"
     ]
   },
   "formatter": {
@@ -23,7 +26,8 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double"
+      "quoteStyle": "single",
+      "semicolons": "asNeeded"
     }
   }
 }

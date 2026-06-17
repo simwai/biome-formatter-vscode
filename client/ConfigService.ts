@@ -3,76 +3,73 @@ import {
   Uri,
   type WorkspaceFolder,
   workspace,
-} from "vscode";
-import type { DiagnosticPullMode } from "vscode-languageclient";
-import {
-  type BinarySearchResult,
-  findExecutableBinary,
-} from "./findBinary";
-import type { IDisposable } from "./types";
-import { VSCodeConfig } from "./VSCodeConfig";
+} from 'vscode'
+import type { DiagnosticPullMode } from 'vscode-languageclient'
+import { type BinarySearchResult, findExecutableBinary } from './findBinary'
+import type { IDisposable } from './types'
+import { VSCodeConfig } from './VSCodeConfig'
 import {
   type BiomeWorkspaceConfigInterface,
   WorkspaceConfig,
-} from "./WorkspaceConfig";
+} from './WorkspaceConfig'
 
 export class ConfigService implements IDisposable {
-  public static readonly namespace = "biome";
-  private readonly _disposables: IDisposable[] = [];
+  public static readonly namespace = 'biome'
+  private readonly _disposables: IDisposable[] = []
 
-  public vsCodeConfig: VSCodeConfig;
+  public vsCodeConfig: VSCodeConfig
 
-  private workspaceConfigs: Map<string, WorkspaceConfig> = new Map();
+  private workspaceConfigs: Map<string, WorkspaceConfig> = new Map()
 
   /** Single-flight cache: stores the in-flight or resolved Promise so concurrent
    * callers share one waterfall run instead of racing each other. */
-  private _binaryPathCache: Promise<BinarySearchResult | undefined> | undefined;
+  private _binaryPathCache: Promise<BinarySearchResult | undefined> | undefined
 
   public onConfigChange:
     | ((this: ConfigService, config: ConfigurationChangeEvent) => Promise<void>)
-    | undefined;
+    | undefined
 
   constructor() {
-    this.vsCodeConfig = new VSCodeConfig();
-    const { workspaceFolders } = workspace;
+    this.vsCodeConfig = new VSCodeConfig()
+    const { workspaceFolders } = workspace
     if (workspaceFolders) {
       for (const folder of workspaceFolders) {
-        this.addWorkspaceConfig(folder);
+        this.addWorkspaceConfig(folder)
       }
     }
-    this.onConfigChange = undefined;
+    this.onConfigChange = undefined
 
     const disposeChangeListener = workspace.onDidChangeConfiguration(
       this.onVscodeConfigChange.bind(this),
-    );
-    this._disposables.push(disposeChangeListener);
+    )
+    this._disposables.push(disposeChangeListener)
   }
 
   public get biomeServerConfig(): {
-    workspaceUri: string;
-    options: BiomeWorkspaceConfigInterface;
+    workspaceUri: string
+    options: BiomeWorkspaceConfigInterface
   }[] {
     return [...this.workspaceConfigs.entries()].map(([path, config]) => {
       return {
         workspaceUri: Uri.file(path).toString(),
         options: config.toBiomeConfig(),
-      };
-    });
+      }
+    })
   }
 
   public addWorkspaceConfig(workspace: WorkspaceFolder): void {
     this.workspaceConfigs.set(
       workspace.uri.fsPath,
       new WorkspaceConfig(workspace),
-    );
+    )
   }
 
   public removeWorkspaceConfig(workspace: WorkspaceFolder): void {
-    this.workspaceConfigs.delete(workspace.uri.fsPath);
+    this.workspaceConfigs.delete(workspace.uri.fsPath)
   }
 
   public getWorkspaceConfig(workspace: Uri): WorkspaceConfig | undefined {
-    return this.workspaceConfigs.get(workspace.fsPath);
+    return this.workspaceConfigs.get(workspace.fsPath)
   }
 
   public effectsWorkspaceConfigChange(
@@ -80,23 +77,23 @@ export class ConfigService implements IDisposable {
   ): boolean {
     for (const workspaceConfig of this.workspaceConfigs.values()) {
       if (workspaceConfig.effectsConfigChange(event)) {
-        return true;
+        return true
       }
     }
-    return false;
+    return false
   }
 
   public getBiomeServerBinPath(): Promise<BinarySearchResult | undefined> {
     this._binaryPathCache ??= findExecutableBinary(
-      "biome",
+      'biome',
       this.vsCodeConfig.binPathBiome,
-    );
-    return this._binaryPathCache;
+    )
+    return this._binaryPathCache
   }
 
   /** Drops the cached binary resolution so the next call re-probes the filesystem. */
   public invalidateBinaryCache(): void {
-    this._binaryPathCache = undefined;
+    this._binaryPathCache = undefined
   }
 
   public shouldRequestDiagnostics(
@@ -104,46 +101,46 @@ export class ConfigService implements IDisposable {
     diagnosticPullMode: DiagnosticPullMode,
   ): boolean {
     if (!this.vsCodeConfig.enableBiome) {
-      return false;
+      return false
     }
 
-    const ws = workspace.getWorkspaceFolder(textDocumentUri);
+    const ws = workspace.getWorkspaceFolder(textDocumentUri)
     if (!ws) {
-      return false;
+      return false
     }
-    const workspaceConfig = this.getWorkspaceConfig(ws.uri);
+    const workspaceConfig = this.getWorkspaceConfig(ws.uri)
 
     return (
       workspaceConfig?.shouldRequestDiagnostics(diagnosticPullMode) ?? false
-    );
+    )
   }
 
   private async onVscodeConfigChange(
     event: ConfigurationChangeEvent,
   ): Promise<void> {
-    let isConfigChanged = false;
+    let isConfigChanged = false
 
     if (event.affectsConfiguration(ConfigService.namespace)) {
-      this.vsCodeConfig.refresh();
-      this.invalidateBinaryCache();
-      isConfigChanged = true;
+      this.vsCodeConfig.refresh()
+      this.invalidateBinaryCache()
+      isConfigChanged = true
     }
 
     for (const workspaceConfig of this.workspaceConfigs.values()) {
       if (workspaceConfig.effectsConfigChange(event)) {
-        workspaceConfig.refresh();
-        isConfigChanged = true;
+        workspaceConfig.refresh()
+        isConfigChanged = true
       }
     }
 
     if (isConfigChanged) {
-      await this.onConfigChange?.(event);
+      await this.onConfigChange?.(event)
     }
   }
 
   dispose() {
     for (const disposable of this._disposables) {
-      void disposable.dispose();
+      void disposable.dispose()
     }
   }
 }
