@@ -1,20 +1,20 @@
-import type { ConfigurationChangeEvent, LogOutputChannel } from "vscode";
-import type { ConfigService } from "../ConfigService";
-import type { BinarySearchResult } from "../findBinary";
-import type StatusBarItemHandler from "../StatusBarItemHandler";
+import type { ConfigurationChangeEvent, LogOutputChannel } from 'vscode'
+import type { ConfigService } from '../ConfigService'
+import type { BinarySearchResult } from '../findBinary'
+import type StatusBarItemHandler from '../StatusBarItemHandler'
 
 export default interface ToolInterface {
   /**
    * Gets the version of the tool's language server (if applicable).
    */
-  getLspVersion(): string | undefined;
+  getLspVersion(): string | undefined
   /**
    * Gets the path to the tool's language server binary (if applicable).
    */
   getBinary(
     outputChannel: LogOutputChannel,
     configService: ConfigService,
-  ): Promise<BinarySearchResult | undefined>;
+  ): Promise<BinarySearchResult | undefined>
   /**
    * Activates the tool and initializes any necessary resources.
    */
@@ -23,12 +23,12 @@ export default interface ToolInterface {
     configService: ConfigService,
     statusBarItemHandler: StatusBarItemHandler,
     binary?: BinarySearchResult,
-  ): Promise<void>;
+  ): Promise<void>
 
   /**
    * Deactivates the tool and cleans up any resources.
    */
-  deactivate(): Promise<void>;
+  deactivate(): Promise<void>
 
   /**
    * Handles configuration changes.
@@ -37,5 +37,5 @@ export default interface ToolInterface {
     event: ConfigurationChangeEvent,
     configService: ConfigService,
     statusBarItemHandler: StatusBarItemHandler,
-  ): Promise<void>;
+  ): Promise<void>
 }

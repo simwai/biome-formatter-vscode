@@ -1,116 +1,116 @@
-import { type ConfigurationChangeEvent, workspace } from "vscode";
-import { ConfigService } from "./ConfigService";
+import { type ConfigurationChangeEvent, workspace } from 'vscode'
+import { ConfigService } from './ConfigService'
 
 export class VSCodeConfig implements VSCodeConfigInterface {
-  private _enableBiome!: boolean;
-  private _trace!: TraceLevel;
-  private _binPathBiome: string | undefined;
-  private _nodePath: string | undefined;
-  private _useExecPath: boolean = false;
-  private _requireConfig!: boolean;
-  private _enabledLanguages!: string[];
+  private _enableBiome!: boolean
+  private _trace!: TraceLevel
+  private _binPathBiome: string | undefined
+  private _nodePath: string | undefined
+  private _useExecPath: boolean = false
+  private _requireConfig!: boolean
+  private _enabledLanguages!: string[]
 
   constructor() {
-    this.refresh();
+    this.refresh()
   }
 
   private get configuration() {
-    return workspace.getConfiguration(ConfigService.namespace);
+    return workspace.getConfiguration(ConfigService.namespace)
   }
 
   public refresh(): void {
-    const enable = this.configuration.get<boolean | null>("enable") ?? true;
+    const enable = this.configuration.get<boolean | null>('enable') ?? true
 
-    this._enableBiome = enable;
-    this._trace = this.configuration.get<TraceLevel>("trace.server") || "off";
-    this._binPathBiome = this.configuration.get<string>("path.biome");
-    this._nodePath = this.configuration.get<string>("path.node");
-    this._useExecPath = this.configuration.get<boolean>("useExecPath") ?? false;
+    this._enableBiome = enable
+    this._trace = this.configuration.get<TraceLevel>('trace.server') || 'off'
+    this._binPathBiome = this.configuration.get<string>('path.biome')
+    this._nodePath = this.configuration.get<string>('path.node')
+    this._useExecPath = this.configuration.get<boolean>('useExecPath') ?? false
     this._requireConfig =
-      this.configuration.get<boolean>("requireConfig") ?? true;
+      this.configuration.get<boolean>('requireConfig') ?? true
     this._enabledLanguages = this.configuration.get<string[]>(
-      "enabledLanguages",
+      'enabledLanguages',
     ) ?? [
-      "astro",
-      "css",
-      "graphql",
-      "html",
-      "javascript",
-      "javascriptreact",
-      "json",
-      "jsonc",
-      "less",
-      "markdown",
-      "mdx",
-      "scss",
-      "svelte",
-      "typescript",
-      "typescriptreact",
-      "vue",
-    ];
+      'astro',
+      'css',
+      'graphql',
+      'html',
+      'javascript',
+      'javascriptreact',
+      'json',
+      'jsonc',
+      'less',
+      'markdown',
+      'mdx',
+      'scss',
+      'svelte',
+      'typescript',
+      'typescriptreact',
+      'vue',
+    ]
   }
 
   get enableBiome(): boolean {
-    return this._enableBiome;
+    return this._enableBiome
   }
 
   updateEnableBiome(value: boolean): PromiseLike<void> {
-    this._enableBiome = value;
-    return this.configuration.update("enable", value);
+    this._enableBiome = value
+    return this.configuration.update('enable', value)
   }
 
   get trace(): TraceLevel {
-    return this._trace;
+    return this._trace
   }
 
   updateTrace(value: TraceLevel): PromiseLike<void> {
-    this._trace = value;
-    return this.configuration.update("trace.server", value);
+    this._trace = value
+    return this.configuration.update('trace.server', value)
   }
 
   get binPathBiome(): string | undefined {
-    return this._binPathBiome;
+    return this._binPathBiome
   }
 
   updateBinPathBiome(value: string | undefined): PromiseLike<void> {
-    this._binPathBiome = value;
-    return this.configuration.update("path.biome", value);
+    this._binPathBiome = value
+    return this.configuration.update('path.biome', value)
   }
 
   get nodePath(): string | undefined {
-    return this._nodePath;
+    return this._nodePath
   }
 
   updateNodePath(value: string | undefined): PromiseLike<void> {
-    this._nodePath = value;
-    return this.configuration.update("path.node", value);
+    this._nodePath = value
+    return this.configuration.update('path.node', value)
   }
 
   get useExecPath(): boolean {
-    return this._useExecPath;
+    return this._useExecPath
   }
 
   updateUseExecPath(value: boolean): PromiseLike<void> {
-    this._useExecPath = value;
-    return this.configuration.update("useExecPath", value);
+    this._useExecPath = value
+    return this.configuration.update('useExecPath', value)
   }
 
   get requireConfig(): boolean {
-    return this._requireConfig;
+    return this._requireConfig
   }
 
   updateRequireConfig(value: boolean): PromiseLike<void> {
-    this._requireConfig = value;
-    return this.configuration.update("requireConfig", value);
+    this._requireConfig = value
+    return this.configuration.update('requireConfig', value)
   }
 
   get enabledLanguages(): string[] {
-    return this._enabledLanguages;
+    return this._enabledLanguages
   }
 
   updateEnabledLanguages(value: string[]): PromiseLike<void> {
-    this._enabledLanguages = value;
-    return this.configuration.update("enabledLanguages", value);
+    this._enabledLanguages = value
+    return this.configuration.update('enabledLanguages', value)
   }
 
   /**
@@ -122,7 +122,7 @@ export class VSCodeConfig implements VSCodeConfigInterface {
     return (
       event.affectsConfiguration(`${ConfigService.namespace}.path.node`) ||
       event.affectsConfiguration(`${ConfigService.namespace}.useExecPath`)
-    );
+    )
   }
 
   effectsBiomeConnection(event: ConfigurationChangeEvent): boolean {
@@ -132,11 +132,11 @@ export class VSCodeConfig implements VSCodeConfigInterface {
         `${ConfigService.namespace}.enabledLanguages`,
       ) ||
       this.effectsGeneralLSPConnection(event)
-    );
+    )
   }
 }
 
-type TraceLevel = "off" | "messages" | "verbose";
+type TraceLevel = 'off' | 'messages' | 'verbose'
 
 /**
  * See `"contributes.configuration"` in `package.json`
@@ -146,44 +146,44 @@ interface VSCodeConfigInterface {
    * `biome.enable`
    * @default true
    */
-  enableBiome: boolean;
+  enableBiome: boolean
   /**
    * Trace VSCode <-> Biome Language Server communication
    * `biome.trace.server`
    *
    * @default 'off'
    */
-  trace: TraceLevel;
+  trace: TraceLevel
   /**
    * Path to the `biome` binary
    * `biome.path.biome`
    * @default undefined
    */
-  binPathBiome: string | undefined;
+  binPathBiome: string | undefined
 
   /**
    * Path to a JavaScript runtime binary (Node.js, bun, or deno)
    * `biome.path.node`
    * @default undefined
    */
-  nodePath: string | undefined;
+  nodePath: string | undefined
 
   /**
    * Whether to use the extension's execPath (Electron's bundled Node.js) as the JavaScript runtime for running Biome tools,
    * instead of looking for a system Node.js installation.
    */
-  useExecPath: boolean;
+  useExecPath: boolean
 
   /**
    * Start the language server only when a `biome.json` file exists in one of the workspaces.
    * `biome.requireConfig`
    * @default true
    */
-  requireConfig: boolean;
+  requireConfig: boolean
 
   /**
    * The languages that Biome should be enabled for.
    * `biome.enabledLanguages`
    */
-  enabledLanguages: string[];
+  enabledLanguages: string[]
 }
