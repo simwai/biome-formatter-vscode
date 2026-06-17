@@ -30,7 +30,7 @@
     "lint": "biome lint",
     "format": "biome check --write .",
     "compile": "rolldown -c rolldown.config.ts",
-    "package": "vsce package --no-dependencies -o biome_formatter.vsix",
+    "package": "vsce package -o biome_formatter.vsix",
     "start": "pnpm run watch",
     "watch": "pnpm run compile -- --watch",
     "build": "pnpm run compile && pnpm run package",
@@ -290,6 +290,6 @@
     }
   },
   "vsce": {
-    "dependencies": false
+    "dependencies": true
   }
 }
