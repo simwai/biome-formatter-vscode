@@ -1,3 +1,11 @@
+## [1.54.1](https://github.com/simwai/biome-formatter-vscode/compare/v1.54.0...v1.54.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* ensure strict_template.json is included in VSIX ([#21](https://github.com/simwai/biome-formatter-vscode/issues/21)) ([a2feacb](https://github.com/simwai/biome-formatter-vscode/commit/a2feacb28223efe18967820124f26fa7daf3cac4))
+* fixed that no dependencies were added to the vsix file ([97495c7](https://github.com/simwai/biome-formatter-vscode/commit/97495c76f894b65b2d8e5338d65bdad21722b26d))
+
 # [1.54.0](https://github.com/simwai/biome-formatter-vscode/compare/v1.53.0...v1.54.0) (2026-06-11)
 
 
