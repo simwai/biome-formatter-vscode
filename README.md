@@ -44,9 +44,11 @@ This extension provides several commands accessible via the Command Palette (`Ct
 - **Biome: Format Project**: Runs `biome format --write .` in the active workspace. If it fails, output is shown in a terminal.
 - **Biome: Fix Project**: Runs `biome check --write .` in the active workspace. If it fails, output is shown in a terminal.
 - **Biome: Fix Project (Unsafe)**: Runs `biome check --write --unsafe .` in the active workspace. If it fails, output is shown in a terminal.
-- **Biome: Open Biome Configuration**: Opens the relevant `biome.json` file for the current project.
+- **Biome: Open Biome Configuration**: Opens the relevant `biome.json`, `biome.jsonc`, `.biome.json`, or `.biome.jsonc` file for the current project.
 - **Biome: Copy Debug Info**: Copies environment and version information to the clipboard.
 - **Biome: Rage (Debug Info)**: Generates a detailed diagnostic report.
+- **Biome: Add Custom Config**: Opens a webview to create and manage custom Biome configurations.
+- **Biome: Spawn Config**: Opens a picker to quickly apply a custom Biome configuration template.
 
 ## Settings
 
@@ -54,12 +56,12 @@ This extension provides several commands accessible via the Command Palette (`Ct
 - `biome.lint.run`: Run the linter `onSave` or `onType`. (Default: `onSave`)
 - `biome.requireConfig`: Start the server only when a `biome.json`, `biome.jsonc`, `.biome.json` or `.biome.jsonc` file exists. (Default: `true`)
 - `biome.trace.server`: Traces the communication between VS Code and the language server. (Default: `off`)
-- `biome.configPath`: Custom path to the Biome configuration file.
+- `biome.configPath`: Custom path to the Biome configuration file. Keep it empty to enable nested configuration.
 - `biome.disableNestedConfig`: Disable searching for nested configuration files. (Default: `false`)
 - `biome.enabledLanguages`: The languages that Biome should be enabled for. (Default: `["astro", "css", "graphql", "html", "javascript", "javascriptreact", "json", "jsonc", "less", "markdown", "mdx", "scss", "svelte", "typescript", "typescriptreact", "vue"]`)
-- `biome.path.biome`: Custom path to a Biome binary.
+- `biome.path.biome`: Custom path to a Biome binary. Default: auto detection in `node_modules`.
 - `biome.path.node`: Custom path to a Node.js binary.
-- `biome.useExecPath`: Use the extension's bundled Node.js runtime. (Default: `false`)
+- `biome.useExecPath`: Whether to use the extension's execPath (Electron's bundled Node.js) as the JavaScript runtime for running Biome tools. (Default: `false`)
 
 ## Comparison with Official Extension
 

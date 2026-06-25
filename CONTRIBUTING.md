@@ -12,8 +12,8 @@ To contribute to this extension, please follow the guidelines on [biomejs.dev](h
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/simwai/biome-vscode.git
-   cd biome-vscode
+   git clone https://github.com/simwai/biome-formatter-vscode.git
+   cd biome-formatter-vscode
    ```
 
 2. **Install dependencies**:
