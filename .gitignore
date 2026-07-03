@@ -5,6 +5,7 @@ node_modules/
 out/
 out_test/
 *.vsix
+dist/
 
 # Test artifacts
 .vscode-test/
