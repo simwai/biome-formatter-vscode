@@ -27,7 +27,6 @@ const languageClientName = 'biome'
 export default class BiomeTool implements ToolInterface {
   private client: LanguageClient | undefined
   private disposeResources: (() => Promise<void>) | undefined
-  private allowedToStartServer: boolean = false
 
   getLspVersion(): string | undefined {
     return this.client?.initializeResult?.serverInfo?.version
@@ -62,16 +61,6 @@ export default class BiomeTool implements ToolInterface {
       )
       return
     }
-
-    this.allowedToStartServer = configService.vsCodeConfig.requireConfig
-      ? (
-          await workspace.findFiles(
-            biomeConfigDefaultFilePattern,
-            '**/node_modules/**',
-            1,
-          )
-        ).length > 0
-      : true
 
     const run: Executable = runExecutable(
       binary,
@@ -131,7 +120,7 @@ export default class BiomeTool implements ToolInterface {
       onNotificationDispose.dispose()
     }
 
-    if (this.allowedToStartServer && configService.vsCodeConfig.enableBiome) {
+    if (await this.shouldStartServer(configService)) {
       await this.client.start()
     }
 
@@ -193,7 +182,8 @@ export default class BiomeTool implements ToolInterface {
       if (this.client) {
         if (
           configService.vsCodeConfig.enableBiome &&
-          !this.client.isRunning()
+          !this.client.isRunning() &&
+          (await this.shouldStartServer(configService))
         ) {
           await this.client.start()
         } else if (
@@ -221,7 +211,7 @@ export default class BiomeTool implements ToolInterface {
     configService: ConfigService,
   ) {
     const enable = configService.vsCodeConfig.enableBiome
-    const isEnabled = this.allowedToStartServer && enable
+    const isEnabled = (this.client?.isRunning() ?? false) && enable
 
     let text =
       `[$(terminal) Open Output](command:${BiomeCommands.ShowOutput})\n\n` +
@@ -247,6 +237,22 @@ export default class BiomeTool implements ToolInterface {
       text,
       this.client?.initializeResult?.serverInfo?.version,
       isFileActive,
+    )
+  }
+
+  private async shouldStartServer(
+    configService: ConfigService,
+  ): Promise<boolean> {
+    if (!configService.vsCodeConfig.enableBiome) return false
+    if (!configService.vsCodeConfig.requireConfig) return true
+    return (
+      (
+        await workspace.findFiles(
+          biomeConfigDefaultFilePattern,
+          '**/node_modules/**',
+          1,
+        )
+      ).length > 0
     )
   }
 }

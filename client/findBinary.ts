@@ -81,9 +81,7 @@ async function searchNodeModulesDefaultBinPath(
 ): Promise<BinarySearchResult | undefined> {
   const candidates = folders.flatMap((folder) => {
     const basePath = path.join(folder, '.bin', binaryName)
-    return process.platform === 'win32'
-      ? [basePath, `${basePath}.exe`]
-      : [basePath]
+    return process.platform === 'win32' ? [`${basePath}.exe`] : [basePath]
   })
 
   const exists = await Promise.all(
@@ -453,12 +451,15 @@ export async function searchExtensionNodeModulesBin(
 export async function isExecutable(filePath: string): Promise<boolean> {
   try {
     await access(filePath, constants.X_OK)
+    if (process.platform === 'win32') {
+      return filePath.endsWith('.exe')
+    }
     return true
   } catch {
     if (process.platform === 'win32') {
       try {
         await access(filePath, constants.F_OK)
-        return !filePath.endsWith('.cmd')
+        return filePath.endsWith('.exe')
       } catch {
         return false
       }

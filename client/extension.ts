@@ -198,15 +198,15 @@ export async function activate(context: ExtensionContext) {
   }
 
   configService.onConfigChange = async function onConfigChange(event) {
-    await Promise.all(
-      tools.map((tool) =>
-        tool.onConfigChange(event, configService, statusBarItemHandler),
-      ),
-    )
-
     if (configService.vsCodeConfig.effectsBiomeConnection(event)) {
       outputChannel.info('biome connection changed, restarting biome tool.')
       await restartTool(tools[0], outputChannel)
+    } else {
+      await Promise.all(
+        tools.map((tool) =>
+          tool.onConfigChange(event, configService, statusBarItemHandler),
+        ),
+      )
     }
   }
 

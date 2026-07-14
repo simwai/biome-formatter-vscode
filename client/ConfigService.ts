@@ -5,7 +5,11 @@ import {
   workspace,
 } from 'vscode'
 import type { DiagnosticPullMode } from 'vscode-languageclient'
-import { type BinarySearchResult, findExecutableBinary } from './findBinary'
+import {
+  type BinarySearchResult,
+  clearWorkspacePackageJsonNodeModulesCache,
+  findExecutableBinary,
+} from './findBinary'
 import type { IDisposable } from './types'
 import { VSCodeConfig } from './VSCodeConfig'
 import {
@@ -94,6 +98,7 @@ export class ConfigService implements IDisposable {
   /** Drops the cached binary resolution so the next call re-probes the filesystem. */
   public invalidateBinaryCache(): void {
     this._binaryPathCache = undefined
+    clearWorkspacePackageJsonNodeModulesCache()
   }
 
   public shouldRequestDiagnostics(
