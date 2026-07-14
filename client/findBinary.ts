@@ -4,7 +4,6 @@ import { access, constants } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import * as path from 'node:path'
 import { env } from 'node:process'
-import { pathToFileURL } from 'node:url'
 import { Uri, workspace } from 'vscode'
 
 export type BinaryLoader = 'node' | 'native'
@@ -81,7 +80,9 @@ async function searchNodeModulesDefaultBinPath(
 ): Promise<BinarySearchResult | undefined> {
   const candidates = folders.flatMap((folder) => {
     const basePath = path.join(folder, '.bin', binaryName)
-    return process.platform === 'win32' ? [`${basePath}.exe`] : [basePath]
+    return process.platform === 'win32'
+      ? [basePath, `${basePath}.exe`]
+      : [basePath]
   })
 
   const exists = await Promise.all(
@@ -451,15 +452,12 @@ export async function searchExtensionNodeModulesBin(
 export async function isExecutable(filePath: string): Promise<boolean> {
   try {
     await access(filePath, constants.X_OK)
-    if (process.platform === 'win32') {
-      return filePath.endsWith('.exe')
-    }
     return true
   } catch {
     if (process.platform === 'win32') {
       try {
         await access(filePath, constants.F_OK)
-        return filePath.endsWith('.exe')
+        return !filePath.endsWith('.cmd')
       } catch {
         return false
       }
