@@ -63,6 +63,10 @@ This extension provides several commands accessible via the Command Palette (`Ct
 - `biome.path.node`: Custom path to a Node.js binary.
 - `biome.useExecPath`: Whether to use the extension's execPath (Electron's bundled Node.js) as the JavaScript runtime for running Biome tools. (Default: `false`)
 
+## Platform Support
+
+This extension bundles a pre-built Biome binary for **Windows x64** only. If no Biome installation is found in your workspace, globally, or on PATH, the bundled binary is used as a fallback. Other operating systems must provide their own Biome binary (via workspace `node_modules`, global install, or `biome.path.biome` setting).
+
 ## Comparison with Official Extension
 
 | Feature             | simwai.biome-vscode (This)         | biomejs.biome (Official)                   |

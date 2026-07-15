@@ -8,3 +8,4 @@
 !client/strict_template.json
 !biome_schema.json
 !client/webview/index.html
+!out/biome-bin/**

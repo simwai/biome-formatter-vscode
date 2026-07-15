@@ -29,7 +29,7 @@
     "test:unit": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=unit vscode-test",
     "lint": "biome lint",
     "format": "biome check --write .",
-    "compile": "rolldown -c rolldown.config.ts && bash -c \"cp ./client/strict_template.json ./out/\"",
+    "compile": "rolldown -c rolldown.config.ts && bash -c \"cp ./client/strict_template.json ./out/\" && node scripts/copy-biome-binary.js",
     "package": "vsce package --no-dependencies -o biome_formatter.vsix",
     "start": "pnpm run watch",
     "watch": "pnpm run compile -- --watch",
@@ -41,7 +41,7 @@
     "*.{js,ts,cjs,mjs,json,jsonc}": "biome check --write --no-errors-on-unmatched"
   },
   "dependencies": {
-    "@biomejs/biome": "^2.4.13",
+    "@biomejs/biome": "2.4.13",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {

@@ -423,6 +423,25 @@ const safeSpawnSync = (
 }
 
 /**
+ * Search for the bundled biome binary in the extension's own out/biome-bin/ directory.
+ * This is used as a fallback when no other strategy finds a biome binary.
+ * The binary is copied there at build time by scripts/copy-biome-binary.js.
+ * Only Windows is supported for bundled binaries.
+ */
+export async function searchBundledBiomeBin(): Promise<
+  BinarySearchResult | undefined
+> {
+  const binaryName = process.platform === 'win32' ? 'biome.exe' : 'biome'
+  const bundlePath = path.join(__dirname, 'biome-bin', binaryName)
+  try {
+    await access(bundlePath, constants.F_OK)
+    return { path: bundlePath, loader: 'native' }
+  } catch {
+    return undefined
+  }
+}
+
+/**
  * Search for the binary in the extension's own node_modules.
  * This is used as a final fallback.
  */
@@ -479,7 +498,8 @@ export async function isExecutable(filePath: string): Promise<boolean> {
  *  3. Yarn PnP
  *  4. Global node_modules (npm / pnpm / bun)
  *  5. PATH
- *  6. Bundled extension fallback
+ *  6. Bundled extension binary
+ *  7. Extension node_modules (last resort)
  */
 export async function findExecutableBinary(
   binaryName: string,
@@ -493,6 +513,7 @@ export async function findExecutableBinary(
     () => searchYarnPnpBin(binaryName),
     () => searchGlobalNodeModulesBin(binaryName),
     () => searchEnvPath(binaryName),
+    () => searchBundledBiomeBin(),
     () => searchExtensionNodeModulesBin(binaryName),
   ]
 
