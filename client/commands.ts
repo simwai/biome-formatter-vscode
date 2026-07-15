@@ -12,8 +12,6 @@ import {
 import type { BinarySearchResult } from './findBinary'
 import type { VSCodeConfig } from './VSCodeConfig'
 
-const _commandPrefix = 'biome'
-
 export enum BiomeCommands {
   ShowOutput = 'biome.showOutput',
   Restart = 'biome.restart',
