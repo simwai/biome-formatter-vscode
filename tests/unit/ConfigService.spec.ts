@@ -1,5 +1,4 @@
 import { strictEqual } from 'node:assert'
-import test, { suite } from 'node:test'
 import { workspace } from 'vscode'
 import { ConfigService } from '../../client/ConfigService.js'
 

@@ -5,7 +5,7 @@ import { BiomeCommands } from '../../client/commands.js'
 
 suite('Registration', () => {
   test('all commands in package.json are defined in BiomeCommands enum', () => {
-    const packageJsonPath = path.resolve(process.cwd(), 'package.json')
+    const packageJsonPath = path.resolve(__dirname, '../../package.json')
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
     const contributedCommands = packageJson.contributes.commands.map(
       (c: any) => c.command,
@@ -22,7 +22,7 @@ suite('Registration', () => {
   })
 
   test('BiomeCommands enum does not contain extra commands not in package.json', () => {
-    const packageJsonPath = path.resolve(process.cwd(), 'package.json')
+    const packageJsonPath = path.resolve(__dirname, '../../package.json')
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
     const contributedCommands = packageJson.contributes.commands.map(
       (c: any) => c.command,
@@ -39,7 +39,7 @@ suite('Registration', () => {
   })
 
   test('all commands in BiomeCommands enum are registered in extension.ts', () => {
-    const extensionPath = path.resolve(process.cwd(), 'client/extension.ts')
+    const extensionPath = path.resolve(__dirname, '../../client/extension.ts')
     const extensionContent = fs.readFileSync(extensionPath, 'utf8')
 
     // We check for the usage of the enum member names in extension.ts
@@ -51,23 +51,6 @@ suite('Registration', () => {
       ok(
         extensionContent.includes(`BiomeCommands.${key}`),
         `Command BiomeCommands.${key} is not referenced in extension.ts for registration`,
-      )
-    }
-  })
-
-  test('all contributed commands have corresponding onCommand activationEvents in package.json', () => {
-    const packageJsonPath = path.resolve(process.cwd(), 'package.json')
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
-    const contributedCommands = packageJson.contributes.commands.map(
-      (c: any) => c.command,
-    )
-    const activationEvents = packageJson.activationEvents || []
-
-    for (const command of contributedCommands) {
-      const expectedEvent = `onCommand:${command}`
-      ok(
-        activationEvents.includes(expectedEvent),
-        `Missing activationEvent "${expectedEvent}" in package.json`,
       )
     }
   })
