@@ -25,6 +25,7 @@ export enum BiomeCommands {
   Rage = 'biome.rage',
   AddCustomConfig = 'biome.addCustomConfig',
   SpawnConfig = 'biome.spawnConfig',
+  OpenConfigManager = 'biome.openConfigManager',
 }
 
 export enum LspCommands {

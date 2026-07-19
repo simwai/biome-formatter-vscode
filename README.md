@@ -47,6 +47,7 @@ This extension provides several commands accessible via the Command Palette (`Ct
 - **Biome: Open Biome Configuration**: Opens the relevant `biome.json`, `biome.jsonc`, `.biome.json`, or `.biome.jsonc` file for the current project.
 - **Biome: Copy Debug Info**: Copies environment and version information to the clipboard.
 - **Biome: Rage (Debug Info)**: Generates a detailed diagnostic report.
+- **Biome: Open Config Manager**: Opens the Biome Config Manager webview to browse, create, edit, and apply custom configuration templates.
 - **Biome: Add Custom Config**: Opens a webview to create and manage custom Biome configurations.
 - **Biome: Spawn Config**: Opens a picker to quickly apply a custom Biome configuration template.
 

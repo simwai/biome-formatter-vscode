@@ -130,6 +130,11 @@
         "command": "biome.spawnConfig",
         "title": "Spawn Config",
         "category": "Biome"
+      },
+      {
+        "command": "biome.openConfigManager",
+        "title": "Open Config Manager",
+        "category": "Biome"
       }
     ],
     "configuration": {

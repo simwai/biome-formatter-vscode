@@ -157,9 +157,17 @@ export async function activate(context: ExtensionContext) {
     },
   )
 
+  const openConfigManagerCommand = commands.registerCommand(
+    BiomeCommands.OpenConfigManager,
+    () => {
+      ConfigWebview.render(context.extensionUri, configManager, 'picker')
+    },
+  )
+
   context.subscriptions.push(
     addCustomConfigCommand,
     spawnConfigCommand,
+    openConfigManagerCommand,
     showOutputCommand,
     restartServerCommand,
     toggleEnableCommand,
