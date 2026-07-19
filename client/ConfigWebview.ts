@@ -61,6 +61,9 @@ export class ConfigWebview {
           case 'validate':
             this.handleValidate(message.content)
             break
+          case 'deleteConfig':
+            await this.handleDeleteConfig(message.id)
+            break
         }
       },
       null,
@@ -143,6 +146,18 @@ export class ConfigWebview {
       config,
       isDefault,
     })
+  }
+
+  private async handleDeleteConfig(id: string) {
+    const confirm = await vscode.window.showWarningMessage(
+      'Delete this configuration?',
+      { modal: true },
+      'Delete',
+      'Cancel',
+    )
+    if (confirm !== 'Delete') return
+    await this._configManager.deleteConfig(id)
+    this.renderConfigs()
   }
 
   private async handleSaveConfig(config: CustomConfig) {
