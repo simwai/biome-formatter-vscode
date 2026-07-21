@@ -1,3 +1,69 @@
+# [1.55.0](https://gitlab.com/simwai/biome-formatter-vscode/compare/v1.54.1...v1.55.0) (2026-07-21)
+
+
+### Bug Fixes
+
+* removed wrong activation events in package.json ([1b44214](https://gitlab.com/simwai/biome-formatter-vscode/commit/1b44214c29403f3a6ff5c1685e0516a6266c9399))
+* resolve 5 bugs in binary search, server start gating, and config change race ([cca98e2](https://gitlab.com/simwai/biome-formatter-vscode/commit/cca98e2fdaac31b47bfa3c5a8ede88706bdbff89))
+* resolve test suite issues (process.cwd, activation-event, weak tests) ([c459c86](https://gitlab.com/simwai/biome-formatter-vscode/commit/c459c865b61fd3aa2b74ba312e323b68d835c933))
+
+
+### Features
+
+* add delete button for saved configs in config webview ([fd9705f](https://gitlab.com/simwai/biome-formatter-vscode/commit/fd9705f69f2be840aed4eca2a1cfa7e3b10b357e))
+* add openConfigManager command to open config manager webview ([ab88669](https://gitlab.com/simwai/biome-formatter-vscode/commit/ab88669ae88d838f972f4fdbfe5a4357ce0f073f))
+* bundle biome 2.4.13 binary inside VSIX as Windows-only fallback ([a53e596](https://gitlab.com/simwai/biome-formatter-vscode/commit/a53e596867be70dc739342831c9b3293491c6998))
+* updated strict_template.json ([92bc658](https://gitlab.com/simwai/biome-formatter-vscode/commit/92bc65866a140032253a717c7d0ec06ef8e98825))
+
+
+### Reverts
+
+* restore isExecutable and searchNodeModulesDefaultBinPath to original Windows behavior ([2849575](https://gitlab.com/simwai/biome-formatter-vscode/commit/28495759fb66aebb981866899184637f70a1de64))
+
+# [1.55.0](https://gitlab.com/simwai/biome-formatter-vscode/compare/v1.54.1...v1.55.0) (2026-07-21)
+
+
+### Bug Fixes
+
+* removed wrong activation events in package.json ([1b44214](https://gitlab.com/simwai/biome-formatter-vscode/commit/1b44214c29403f3a6ff5c1685e0516a6266c9399))
+* resolve 5 bugs in binary search, server start gating, and config change race ([cca98e2](https://gitlab.com/simwai/biome-formatter-vscode/commit/cca98e2fdaac31b47bfa3c5a8ede88706bdbff89))
+* resolve test suite issues (process.cwd, activation-event, weak tests) ([c459c86](https://gitlab.com/simwai/biome-formatter-vscode/commit/c459c865b61fd3aa2b74ba312e323b68d835c933))
+
+
+### Features
+
+* add delete button for saved configs in config webview ([fd9705f](https://gitlab.com/simwai/biome-formatter-vscode/commit/fd9705f69f2be840aed4eca2a1cfa7e3b10b357e))
+* add openConfigManager command to open config manager webview ([ab88669](https://gitlab.com/simwai/biome-formatter-vscode/commit/ab88669ae88d838f972f4fdbfe5a4357ce0f073f))
+* bundle biome 2.4.13 binary inside VSIX as Windows-only fallback ([a53e596](https://gitlab.com/simwai/biome-formatter-vscode/commit/a53e596867be70dc739342831c9b3293491c6998))
+* updated strict_template.json ([92bc658](https://gitlab.com/simwai/biome-formatter-vscode/commit/92bc65866a140032253a717c7d0ec06ef8e98825))
+
+
+### Reverts
+
+* restore isExecutable and searchNodeModulesDefaultBinPath to original Windows behavior ([2849575](https://gitlab.com/simwai/biome-formatter-vscode/commit/28495759fb66aebb981866899184637f70a1de64))
+
+# [1.55.0](https://gitlab.com/simwai/biome-formatter-vscode/compare/v1.54.1...v1.55.0) (2026-07-21)
+
+
+### Bug Fixes
+
+* removed wrong activation events in package.json ([1b44214](https://gitlab.com/simwai/biome-formatter-vscode/commit/1b44214c29403f3a6ff5c1685e0516a6266c9399))
+* resolve 5 bugs in binary search, server start gating, and config change race ([cca98e2](https://gitlab.com/simwai/biome-formatter-vscode/commit/cca98e2fdaac31b47bfa3c5a8ede88706bdbff89))
+* resolve test suite issues (process.cwd, activation-event, weak tests) ([c459c86](https://gitlab.com/simwai/biome-formatter-vscode/commit/c459c865b61fd3aa2b74ba312e323b68d835c933))
+
+
+### Features
+
+* add delete button for saved configs in config webview ([fd9705f](https://gitlab.com/simwai/biome-formatter-vscode/commit/fd9705f69f2be840aed4eca2a1cfa7e3b10b357e))
+* add openConfigManager command to open config manager webview ([ab88669](https://gitlab.com/simwai/biome-formatter-vscode/commit/ab88669ae88d838f972f4fdbfe5a4357ce0f073f))
+* bundle biome 2.4.13 binary inside VSIX as Windows-only fallback ([a53e596](https://gitlab.com/simwai/biome-formatter-vscode/commit/a53e596867be70dc739342831c9b3293491c6998))
+* updated strict_template.json ([92bc658](https://gitlab.com/simwai/biome-formatter-vscode/commit/92bc65866a140032253a717c7d0ec06ef8e98825))
+
+
+### Reverts
+
+* restore isExecutable and searchNodeModulesDefaultBinPath to original Windows behavior ([2849575](https://gitlab.com/simwai/biome-formatter-vscode/commit/28495759fb66aebb981866899184637f70a1de64))
+
 ## [1.54.1](https://github.com/simwai/biome-formatter-vscode/compare/v1.54.0...v1.54.1) (2026-06-18)
 
 
