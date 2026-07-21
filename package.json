@@ -13,14 +13,7 @@
     "linter",
     "biome"
   ],
-  "bugs": {
-    "url": "https://github.com/simwai/biome-vscode/issues"
-  },
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/simwai/biome-formatter-vscode"
-  },
   "publisher": "simwai",
   "main": "./out/main.js",
   "scripts": {
@@ -50,8 +43,6 @@
     "@commitlint/config-conventional": "^20.5.3",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/npm": "^13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.1.0",
