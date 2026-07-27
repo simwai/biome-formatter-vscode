@@ -1,7 +1,7 @@
 {
   "name": "biome-vscode",
   "displayName": "Biome Formatter",
-  "version": "1.55.1",
+  "version": "1.55.2",
   "description": "Biome linter and formatter integration",
   "categories": [
     "Formatters",

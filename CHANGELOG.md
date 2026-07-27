@@ -1,3 +1,10 @@
+## [1.55.2](https://gitlab.com/simwai/biome-formatter-vscode/compare/v1.55.1...v1.55.2) (2026-07-27)
+
+
+### Bug Fixes
+
+* re-add @semantic-release/git and @semantic-release/npm to release pipeline ([b0d6e73](https://gitlab.com/simwai/biome-formatter-vscode/commit/b0d6e734a062009f498080584def1b08382f5160))
+
 ## [1.55.1](https://gitlab.com/simwai/biome-formatter-vscode/compare/v1.55.0...v1.55.1) (2026-07-27)
 
 
