@@ -1,3 +1,11 @@
+## [1.55.1](https://gitlab.com/simwai/biome-formatter-vscode/compare/v1.55.0...v1.55.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* ensure compile runs before package and release ([7ae175b](https://gitlab.com/simwai/biome-formatter-vscode/commit/7ae175b4217f4a35ed44232405b95e2ea59b6829))
+* wrap extension activation in try/catch to ensure status bar always shows ([74651fc](https://gitlab.com/simwai/biome-formatter-vscode/commit/74651fc0881f260e7f726182e17bf4925869d231))
+
 # [1.55.0](https://gitlab.com/simwai/biome-formatter-vscode/compare/v1.54.1...v1.55.0) (2026-07-21)
 
 
