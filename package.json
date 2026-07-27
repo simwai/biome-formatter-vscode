@@ -15,6 +15,10 @@
   ],
   "license": "MIT",
   "publisher": "simwai",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/simwai/biome-formatter-vscode"
+  },
   "main": "./out/main.js",
   "scripts": {
     "prepare": "husky",
