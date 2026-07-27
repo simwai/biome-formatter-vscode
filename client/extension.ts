@@ -220,13 +220,24 @@ export async function activate(context: ExtensionContext) {
 
   outputChannel.info('Searching for biome binary.')
 
-  const binaryPath = await tools[0].getBinary(outputChannel, configService)
-  await tools[0].activate(
-    outputChannel,
-    configService,
-    statusBarItemHandler,
-    binaryPath,
-  )
+  try {
+    const binaryPath = await tools[0].getBinary(outputChannel, configService)
+    await tools[0].activate(
+      outputChannel,
+      configService,
+      statusBarItemHandler,
+      binaryPath,
+    )
+  } catch (e) {
+    outputChannel.error(
+      `Failed to activate biome tool: ${e instanceof Error ? e.message : String(e)}`,
+    )
+    statusBarItemHandler.updateTool(
+      'biome',
+      false,
+      `Activation failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
+  }
 
   statusBarItemHandler.show()
 }
