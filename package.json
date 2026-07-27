@@ -25,8 +25,9 @@
     "pretest": "pwsh -Command \"Get-Process -Name 'CodeSetup*' -ErrorAction SilentlyContinue | Stop-Process -Force\"",
     "test": "cross-env TEST=true pnpm run compile && vscode-test",
     "test:unit": "cross-env TEST=true pnpm run compile && cross-env TEST_SUITE=unit vscode-test",
-    "lint": "biome lint",
-    "format": "biome check --write .",
+    "type-check": "tsc --noEmit",
+    "lint": "biome check --write --max-diagnostics 500 .",
+    "format": "biome format --write .",
     "compile": "rolldown -c rolldown.config.ts && bash -c \"cp ./client/strict_template.json ./out/\" && node scripts/copy-biome-binary.js",
     "package": "pnpm run compile && vsce package --no-dependencies -o biome_formatter.vsix",
     "start": "pnpm run watch",
@@ -36,7 +37,8 @@
     "release": "pnpm run compile && node --env-file=.env ./node_modules/semantic-release/bin/semantic-release.js --no-ci"
   },
   "lint-staged": {
-    "*.{js,ts,cjs,mjs,json,jsonc}": "biome check --write --no-errors-on-unmatched"
+    "*.{js,ts,cjs,mjs}": "pnpm type-check",
+    "*.{js,ts,cjs,mjs,json,jsonc,ts}": "pnpm format"
   },
   "dependencies": {
     "@biomejs/biome": "2.4.13",
@@ -54,6 +56,7 @@
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.7.1",
+    "concurrently": "^10.0.4",
     "cross-env": "^10.1.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",

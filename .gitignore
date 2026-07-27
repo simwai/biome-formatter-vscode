@@ -17,6 +17,9 @@ dist/
 # Rust
 vscode_docs/target/
 
-.env
 # Logs
 *.log
+
+# Misc
+.env
+*.old
