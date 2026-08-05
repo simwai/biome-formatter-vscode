@@ -39,6 +39,7 @@ export const WORKSPACE_SECOND_DIR = WORKSPACE_SECOND_FOLDER?.uri
 const rootBiomeConfigUri = WORKSPACE_DIR
   ? Uri.joinPath(WORKSPACE_DIR, '.biomerc.json')
   : Uri.from({ scheme: '', path: '' })
+// biome-ignore lint/suspicious/noConsole: test helper warning
 if (!rootBiomeConfigUri.scheme) console.warn('Invalid root biome config URI')
 
 export function testSingleFolderMode(title: string, fn: Func) {
@@ -62,6 +63,7 @@ export async function sleep(ms: number): Promise<void> {
 }
 
 export async function activateExtension(full: boolean = true): Promise<void> {
+  // biome-ignore lint/style/noNonNullAssertion: extension must be available in test context
   const ext = extensions.getExtension('simwai.biome-vscode')!
   if (!ext.isActive) {
     await ext.activate()

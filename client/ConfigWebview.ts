@@ -1,5 +1,5 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 import * as vscode from 'vscode'
 import type { ConfigManager, CustomConfig } from './ConfigManager'
 import { Validator } from './Validator'
@@ -38,7 +38,7 @@ export class ConfigWebview {
       if (fs.existsSync(schemaPath)) {
         this._validator = new Validator(fs.readFileSync(schemaPath, 'utf8'))
       }
-    } catch (e) {}
+    } catch (_e) {}
 
     this._panel.webview.html = this._getHtmlForWebview(this._panel.webview)
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables)
@@ -207,7 +207,7 @@ export class ConfigWebview {
     this._panel.webview.postMessage({ command: 'validationResult', errors })
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview) {
+  private _getHtmlForWebview(_webview: vscode.Webview) {
     const htmlPath = path.join(
       this._extensionUri.fsPath,
       'client',

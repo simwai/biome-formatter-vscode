@@ -185,7 +185,7 @@
     <div id="picker-view" class="w-full max-w-3xl flex flex-col gap-6">
         <div class="flex justify-between items-center mb-2">
             <h1>Biome Configs</h1>
-            <button id="new-config-btn" class="secondary">+ New</button>
+            <button type="button" id="new-config-btn" class="secondary">+ New</button>
         </div>
         <div id="config-list" class="flex flex-col gap-4">
             <!-- Configs will be rendered here -->
@@ -194,7 +194,7 @@
 
     <div id="editor-view" class="w-full max-w-3xl flex flex-col gap-6 hidden">
         <div class="flex justify-between items-center">
-            <button id="back-btn" class="secondary">← Back</button>
+            <button type="button" id="back-btn" class="secondary">← Back</button>
             <h2 id="editor-title">Edit Config</h2>
             <div style="width: 80px"></div>
         </div>
@@ -211,7 +211,7 @@
         </div>
 
         <div class="sticky-footer flex gap-4">
-            <button id="spawn-btn" class="w-full p-4">Spawn into Workspace</button>
+            <button type="button" id="spawn-btn" class="w-full p-4">Spawn into Workspace</button>
         </div>
     </div>
 
@@ -242,7 +242,7 @@
             }
         });
 
-        function renderConfigs(configs, strictTemplate) {
+        function renderConfigs(configs, _strictTemplate) {
             configList.innerHTML = '';
 
             const defaultCard = createCard('Strict Default Template', 'Built-in base with all recommended rules set to error', () => {
@@ -340,7 +340,7 @@
                 validationError.classList.add('hidden');
                 vscode.postMessage({ command: 'validate', content });
             } catch (e) {
-                validationError.innerText = 'Invalid JSON: ' + e.message;
+                validationError.innerText = `Invalid JSON: ${e.message}`;
                 validationError.classList.remove('hidden');
             }
         }

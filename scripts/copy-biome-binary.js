@@ -21,6 +21,7 @@ const PLATFORM_BINARY = {
 
 const binarySuffix = PLATFORM_BINARY[platform]?.[arch]
 if (!binarySuffix) {
+  // biome-ignore lint/suspicious/noConsole: build script
   console.error(`Unsupported platform: ${platform}-${arch}`)
   process.exit(1)
 }
@@ -36,6 +37,7 @@ const scopeDir = path.dirname(biomePkgDir)
 const sourcePath = path.join(scopeDir, parts[1], binaryName)
 
 if (!fs.existsSync(sourcePath)) {
+  // biome-ignore lint/suspicious/noConsole: build script
   console.error(`Biome binary not found at: ${sourcePath}`)
   process.exit(1)
 }
@@ -47,4 +49,5 @@ const destPath = path.join(outDir, binaryName)
 fs.copyFileSync(sourcePath, destPath)
 fs.chmodSync(destPath, 0o755)
 
+// biome-ignore lint/suspicious/noConsole: build script
 console.log(`Copied biome binary: ${sourcePath} -> ${destPath}`)

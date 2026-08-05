@@ -4,14 +4,15 @@
     "enabled": false
   },
   "files": {
-    "ignoreUnknown": false,
+    "ignoreUnknown": true,
     "includes": [
       "src",
       "**/*",
       "!!.vscode-test",
       "!!node_modules",
       "!!**/*.vsix",
-      "!!*out*"
+      "!!*out*",
+      "!!dist"
     ]
   },
   "formatter": {
@@ -21,7 +22,48 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "complexity": {
+        "noBannedTypes": "error",
+        "noStaticOnlyClass": "error",
+        "noUselessLoneBlockStatements": "error",
+        "useArrowFunction": "warn",
+        "useLiteralKeys": "error"
+      },
+      "correctness": {
+        "noUnusedImports": "warn",
+        "noUnusedPrivateClassMembers": "error",
+        "noUnusedVariables": "error"
+      },
+      "performance": {
+        "noAccumulatingSpread": "warn",
+        "noBarrelFile": "off"
+      },
+      "security": {
+        "noGlobalEval": "error"
+      },
+      "style": {
+        "noNamespace": "off",
+        "noNegationElse": "warn",
+        "noNonNullAssertion": "warn",
+        "noParameterAssign": "error",
+        "useConst": "error",
+        "useExportType": "error",
+        "useImportType": "error",
+        "useNodejsImportProtocol": "error",
+        "useNumberNamespace": "error",
+        "useShorthandAssign": "error",
+        "useSingleVarDeclarator": "error",
+        "useTemplate": "error"
+      },
+      "suspicious": {
+        "noApproximativeNumericConstant": "warn",
+        "noConfusingVoidType": "error",
+        "noConsole": "warn",
+        "noConstEnum": "error",
+        "noEmptyBlock": "warn",
+        "noExplicitAny": "warn"
+      }
     }
   },
   "javascript": {

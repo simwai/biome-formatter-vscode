@@ -336,42 +336,44 @@ export async function searchSettingsBin(
     return undefined
   }
 
-  if (!path.isAbsolute(settingsBinary)) {
+  let resolvedPath = settingsBinary
+
+  if (!path.isAbsolute(resolvedPath)) {
     const cwd = workspace.workspaceFolders?.[0]?.uri.fsPath
     if (!cwd) {
       return undefined
     }
     // if the path is not absolute, resolve it to the first workspace folder
-    settingsBinary = path.normalize(path.join(cwd, settingsBinary))
+    resolvedPath = path.normalize(path.join(cwd, resolvedPath))
   }
 
-  if (process.platform !== 'win32' && settingsBinary.endsWith('.exe')) {
+  if (process.platform !== 'win32' && resolvedPath.endsWith('.exe')) {
     // on non-Windows, remove `.exe` extension if present
-    settingsBinary = settingsBinary.slice(0, -4)
+    resolvedPath = resolvedPath.slice(0, -4)
   }
 
   const isNode =
-    settingsBinary.endsWith('.js') ||
-    settingsBinary.endsWith('.cjs') ||
-    settingsBinary.endsWith('.mjs') ||
-    settingsBinary.endsWith(
+    resolvedPath.endsWith('.js') ||
+    resolvedPath.endsWith('.cjs') ||
+    resolvedPath.endsWith('.mjs') ||
+    resolvedPath.endsWith(
       `${defaultBinaryName}${path.sep}bin${path.sep}${defaultBinaryName}`,
     )
 
   try {
-    await workspace.fs.stat(Uri.file(settingsBinary))
-    return { path: settingsBinary, loader: isNode ? 'node' : 'native' }
+    await workspace.fs.stat(Uri.file(resolvedPath))
+    return { path: resolvedPath, loader: isNode ? 'node' : 'native' }
   } catch {}
 
   // on Windows, also check for `.exe` extension (bun uses `.exe` for its binaries)
   if (process.platform === 'win32') {
-    if (!settingsBinary.endsWith('.exe')) {
-      settingsBinary += '.exe'
+    if (!resolvedPath.endsWith('.exe')) {
+      resolvedPath += '.exe'
     }
 
     try {
-      await workspace.fs.stat(Uri.file(settingsBinary))
-      return { path: settingsBinary, loader: 'native' }
+      await workspace.fs.stat(Uri.file(resolvedPath))
+      return { path: resolvedPath, loader: 'native' }
     } catch {}
   }
 

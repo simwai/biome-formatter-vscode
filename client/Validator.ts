@@ -1,4 +1,5 @@
 export class Validator {
+  // biome-ignore lint/suspicious/noExplicitAny: JSON schema traversal requires dynamic typing
   private schema: any
   private ruleCategories: Map<string, Set<string>> = new Map()
 
@@ -7,12 +8,13 @@ export class Validator {
       this.schema = JSON.parse(schemaJson)
       this.buildRuleMap()
     } catch (e) {
+      // biome-ignore lint/suspicious/noConsole: legitimate error handler
       console.error('Failed to parse schema for validation', e)
     }
   }
 
   private buildRuleMap() {
-    const rulesDef = this.schema['$defs']?.['Rules']?.properties
+    const rulesDef = this.schema.$defs?.Rules?.properties
     if (!rulesDef) return
 
     for (const category of Object.keys(rulesDef)) {
@@ -31,11 +33,12 @@ export class Validator {
     }
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: JSON schema traversal requires dynamic typing
   private getProperties(def: any): any {
     if (!def) return null
     if (def.properties) return def.properties
-    if (def['$ref']) {
-      const resolved = this.resolveRef(def['$ref'])
+    if (def.$ref) {
+      const resolved = this.resolveRef(def.$ref)
       return this.getProperties(resolved)
     }
     if (def.anyOf) {
@@ -53,6 +56,7 @@ export class Validator {
     return null
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: JSON schema traversal requires dynamic typing
   private resolveRef(ref: string): any {
     const path = ref.replace('#/', '').split('/')
     let current = this.schema
@@ -65,13 +69,14 @@ export class Validator {
 
   public validate(content: string): string[] {
     const errors: string[] = []
+    // biome-ignore lint/suspicious/noExplicitAny: JSON.parse result needs dynamic access
     let json: any
     try {
       // Biome allows trailing commas in some cases but JSON.parse does not.
       // However, the user asked for valid JSON validation.
       json = JSON.parse(content)
-    } catch (e: any) {
-      return [`Invalid JSON: ${e.message}`]
+    } catch (e: unknown) {
+      return [`Invalid JSON: ${e instanceof Error ? e.message : String(e)}`]
     }
 
     if (!this.schema) return []
@@ -86,7 +91,7 @@ export class Validator {
     }
 
     // Deep check for rules
-    if (json.linter && json.linter.rules) {
+    if (json.linter?.rules) {
       const rules = json.linter.rules
       for (const category of Object.keys(rules)) {
         if (category === 'recommended' || category === 'all') continue

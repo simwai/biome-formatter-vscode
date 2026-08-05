@@ -8,6 +8,7 @@ suite('Registration', () => {
     const packageJsonPath = path.resolve(__dirname, '../../package.json')
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
     const contributedCommands = packageJson.contributes.commands.map(
+      // biome-ignore lint/suspicious/noExplicitAny: package.json structure is dynamic
       (c: any) => c.command,
     )
 
@@ -25,6 +26,7 @@ suite('Registration', () => {
     const packageJsonPath = path.resolve(__dirname, '../../package.json')
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
     const contributedCommands = packageJson.contributes.commands.map(
+      // biome-ignore lint/suspicious/noExplicitAny: package.json structure is dynamic
       (c: any) => c.command,
     )
 
@@ -44,7 +46,7 @@ suite('Registration', () => {
 
     // We check for the usage of the enum member names in extension.ts
     const enumKeys = Object.keys(BiomeCommands).filter((key) =>
-      isNaN(Number(key)),
+      Number.isNaN(Number(key)),
     )
 
     for (const key of enumKeys) {

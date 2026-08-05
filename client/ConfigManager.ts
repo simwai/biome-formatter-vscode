@@ -19,10 +19,10 @@ export class ConfigManager {
   public async saveConfig(config: CustomConfig): Promise<void> {
     const configs = this.getConfigs()
     const index = configs.findIndex((c) => c.id === config.id)
-    if (index !== -1) {
-      configs[index] = config
-    } else {
+    if (index === -1) {
       configs.push(config)
+    } else {
+      configs[index] = config
     }
     await this.storage.update(ConfigManager.STORAGE_KEY, configs)
   }
