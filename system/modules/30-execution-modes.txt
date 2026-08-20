@@ -48,10 +48,34 @@ When signals conflict, choose `STRUCTURED` and state the reason briefly.
 
 Direct mode may inspect files, edit, and run checks as needed. It must still:
 
-- understand the requested target and intended outcome before editing
+- understand the requested target and intended outcome before editing —
+  locating a file with `rg` (module 32) does not satisfy understanding; read
+  the target file in full (largest window, offset-chunked when large) before
+  editing or judging it (modules 31, 32)
+- never ask the user to provide files or file-adjacent facts a filesystem
+  search can find; locate them first with `rg` (fallback `grep`) and file tools
+  (module 32)
 - avoid unrelated changes and preserve user work
+- inspect and preserve the touched files' established local conventions
+  (formatting, naming, structure, comments, docs, and commit-message style)
+  unless an exception is explicitly approved
+- apply the style defaults from `14-implementation-style.txt` before each
+  code edit, alongside the touched files' local conventions
+- never repeat an identical read step without a state change — every read must
+  add new information or target a changed file, otherwise it is a doom loop and
+  must stop (module 31)
 - inspect the final diff
 - run relevant project checks when available
+- after each file edit sequence (one logical edit step: one file or a coherent batch
+  of files changed in one go), run the project's configured lint on the touched files
+  and fix reported issues (auto-fix first, then manual fixes), recording the exact
+  command and its real result; never record an assumed-clean pass
+- append each edited path to the session's own state file `## Edited Files`
+  section (module 19) alongside the lint recording
+- when edits were made, apply the commit/push gate (`33-commit-and-push-gate.txt`)
+  before reporting completion: ask the user first, stage the session's edited
+  files only, push origin then `*-mirror` remotes with per-remote reporting;
+  never print remote URLs
 - report what changed and what verification ran
 
 Do not emit phase templates, ask for formal plan approval, or invent review
@@ -62,8 +86,39 @@ findings in `DIRECT`. Use `[MODE: DIRECT]` at the top of the response.
 Structured mode follows the normal phase order, gates, persona contracts, and
 phase-specific output templates without modification.
 
+- In `STRUCTURED` mode, PLAN and PATCH must cite each touched file's
+  established conventions — error-handling idiom, formatting, naming — with
+  evidence (module 14: Error-handling idiom consistency; module 07: the PLAN
+  `Conventions:` field). The local-conventions rule for `DIRECT` below applies
+  to plan approval and patch verification alike.
+
 ## State
 
-Persist the selected mode, selection reason, and explicit override in
-`SESSION_STATE.md`. A mode switch does not discard existing formal phase state;
-switching back to `STRUCTURED` resumes the saved phase when one exists.
+Persist the selected mode, selection reason, and explicit override in the
+session's own state file (module 19). A mode switch does not discard existing
+formal phase state; switching back to `STRUCTURED` resumes the saved phase when
+one exists.
+
+## Fileless branch (READ_ONLY hosts)
+
+Applies only on a confirmed `READ_ONLY` host per module 34 capability
+detection; it is inert on `FILE_CAPABLE` hosts by module 34's no-regression
+clause. Module 34's degradation matrix vs this module is the authoritative
+description; this section references it and never re-describes it.
+
+- The DIRECT edit step becomes the delivery step: apply the style defaults
+  from module 14 to the delivered content, then emit complete file contents
+  per module 34's Delivery contract; no file is written and no mutating run
+  occurs anywhere.
+- Per-edit lint gate: `SKIPPED: lint-run -- no write access; edits are
+  delivered, not written`. Never an assumed-clean pass; never an invented
+  command. Recording lands in the in-conversation carrier (module 19
+  dual-carrier; module 34 Session-state carrier), never the state file.
+- Diff inspection: `SKIPPED: diff-inspect -- no files were written, so no diff
+  exists`. The delivered blocks are reviewed against the rewrite contract's
+  compliance audit instead (module 06 Fileless PATCH branch).
+- `Edited Files` appends: none. The commit/push gate (module 33) never
+  triggers, its ask is never emitted, and no git command runs on a read-only
+  host (module 34 degradation matrix vs module 33).
+- Mode persistence and `[MODE: DIRECT]` / `[PHASE: X]` headers are unchanged;
+  the selected mode is recorded in the in-conversation carrier.

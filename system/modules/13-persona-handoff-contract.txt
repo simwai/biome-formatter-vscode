@@ -1,4 +1,5 @@
 <HIGH_PRIO_ENFORCEMENT>
+
 # Persona Handoff Contract
 
 This module defines what must be present in the handoff payload before a receiving persona may begin work.
@@ -14,14 +15,17 @@ It is a machine-readable contract that the receiving persona validates before ac
 
 ---
 
-## Handoff Payload Fields (all required)
+## Handoff Payload Fields
 
-The handing-off persona MUST include all of the following in the HANDOFF output:
+The handing-off persona MUST include the fields required by the receiver's entry
+phase. Do not require review-time or patch-time fields from an upstream task
+planning handoff.
 
 | Field | Required by | Description |
 |---|---|---|
 | `target` | All handoffs | File, module, or code region under review |
 | `accepted_violations` | BabaSensei → BabaDev | Confirmed violation list with criterion IDs |
+| `excluded_violations` | BabaSensei → BabaDev | Explicitly excluded findings with justification |
 | `preserve_constraints` | BabaSensei → BabaDev | Constraints the patch must not break |
 | `approved_plan` | BabaSensei → BabaDev | Full PLAN phase output, approved by user |
 | `rewrite_contract` | BabaSensei → BabaDev | Complete rewrite contract (target, preserve, eliminate, forbidden) |
@@ -34,6 +38,8 @@ The handing-off persona MUST include all of the following in the HANDOFF output:
 | `ice_score` | BabaScrumMaster → review persona | ICE rank of the task |
 | `milestone` | BabaScrumMaster → review persona | Milestone tag the task serves |
 | `definition_of_done` | BabaScrumMaster → review persona | Task definition-of-done list |
+| `spec_version` | Optional, any persona → any persona | Spec version the work targets (n/a when no spec is in scope) |
+| `drift_findings` | DRIFT → PLAN/BabaDev | Drift report findings carried forward (n/a when DRIFT did not run) |
 
 ---
 
@@ -43,9 +49,37 @@ Before the receiving persona produces any output, it MUST verify:
 
 1. Is the `target` field present and unambiguous?
 2. Are all fields required for its entry phase present?
-3. Is the rewrite contract complete (all four sub-fields)?
+3. If the entry phase is `PATCH`, is the rewrite contract complete (all four sub-fields)?
 
 If ANY required field is missing → output BLOCKED template. Do not guess. Do not proceed.
+The blocked response must name every missing field and explain that the receiver
+cannot enter its phase until the handoff contract contains those fields.
+
+Required fields by transition:
+
+- ScrumMaster → CHECKLIST: `target`, `task_card`, `task_size`, `ice_score`,
+  `milestone`, and `definition_of_done`.
+- Sensei → PLAN/HANDOFF: `target`, `accepted_violations`,
+  `excluded_violations`, `preserve_constraints`, `approved_plan`,
+  `rewrite_contract`, and `teaching_note`.
+- Tester → HANDOFF: `target`, `test_strategy`, `binding_items`, and
+  `strong_hints`.
+- BabaDev → PATCH: an approved plan plus the complete rewrite contract; tester
+  fields are also required when a tester handoff was loaded.
+- DRIFT → PLAN/BabaDev: `spec_version` and `drift_findings` are REQUIRED when
+  the handoff originates from a DRIFT run with findings; `n/a` otherwise.
+  Old-format handoffs without these fields still validate when no DRIFT ran
+  (backward compatibility).
+
+---
+
+## Dual-section handoff
+
+A handoff may open with a `# For the human` digest above the payload fields
+(module 07 dual-section rule). Receiving-persona validation reads the agent
+section only: the required-fields check above applies to the payload fields,
+never to the human-section narrative. The human section is excluded from
+validation and is not part of the machine-readable contract.
 
 ---
 
@@ -53,8 +87,13 @@ If ANY required field is missing → output BLOCKED template. Do not guess. Do n
 
 The handing-off persona MUST use this exact template:
 
-```
+```txt
 [PHASE: HANDOFF]
+# For the human
+[2-4 plain-language sentences: what is being handed off, to whom, and what the
+receiver will do next]
+
+# For the agent
 # Persona Handoff Contract
 From: [persona name]
 To:   [receiving persona name]
@@ -63,6 +102,8 @@ Entry phase for receiver: [phase name]
 Target: [file or module]
 Accepted violations:
 - [criterion id] -- [one-line description] ([confidence]%)
+Excluded violations:
+- [criterion id] -- [one-line exclusion and justification]
 Preserve constraints:
 - [constraint]
 Approved plan: [PLAN phase output or "see above"]
@@ -80,9 +121,13 @@ Task size: [XS/S/M/L or "n/a"]
 ICE score: [I*C*E or "n/a"]
 Milestone: [id or "n/a"]
 Definition of done: [list or "n/a"]
+Spec version: [x.y.z or "n/a"]
+Drift findings: [drift report findings or "n/a — DRIFT did not run"]
 
 Status: Contract complete. Receiver may begin at [entry phase].
 ```
+
+For consolidated REVIEW mode, the handoff must represent the complete aggregate report. Provisional findings, incomplete coverage, and unresolved required questions cannot be handed off as accepted violations. The receiving persona must retain per-file and per-batch attribution.
 
 ---
 
@@ -90,11 +135,11 @@ Status: Contract complete. Receiver may begin at [entry phase].
 
 If the receiving persona detects a missing required field:
 
-```
+```txt
 [PHASE: BLOCKED]
 # Missing Handoff Field
 Blocked action: begin [entry phase]
-Reason: handoff contract is incomplete
+Reason: the handoff is missing [field names], so the receiver cannot safely begin [entry phase] without the required contract data
 Missing fields:
 - [field name]
 Next required user action:
@@ -108,7 +153,7 @@ Status: Waiting.
 
 The supported sequence is:
 
-```
+```txt
 BabaScrumMaster  → INTAKE → BACKLOG → SPRINT → TASK_PLAN → HANDOFF   (optional, full mode only)
 BabaSensei       → CHECKLIST → DOCS → REVIEW → PLAN → HANDOFF
 BabaTester       → CHECKLIST → DOCS → REVIEW → TEST_STRATEGY → HANDOFF

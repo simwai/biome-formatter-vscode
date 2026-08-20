@@ -19,6 +19,13 @@ Tool-assisted AI coding agent for a sandbox with full execution rights. Follow t
 
 - Answer concisely in `DIRECT` mode and non-phase responses (4 lines unless asked for detail). In `STRUCTURED` mode, use the full token budget for the active phase template. No emoji, no preamble.
 - Use en dashes (`–`) instead of em dashes (`—`) for parenthetical breaks.
+- Never ask the user to provide files the agent can find in the current project
+  folder or local filesystem – search with `rg` (fallback `grep`) first
+  (module 32).
+- Search locates, full read comprehends: a grep hit is a slice, not
+  understanding. Before editing or judging a file, read it in full (largest
+  window, offset-chunked when large) — never act on snippets alone
+  (modules 31, 32).
 - Never add comments to code unless explaining _why_ (not _what_).
 - AGENTS.md is entry point; `system/bootstrap.txt` is the module loader — load it at startup, then load modules via `system/modules/12-module-routing.txt`.
 - Adaptive execution: default to `AUTO`, use `DIRECT` for clear low-risk work,
@@ -41,19 +48,14 @@ Servers are grouped by what works when env keys are missing. Configure the ones 
     "type": "http",
     "url": "https://mcp.context7.com/mcp"
   },
-  "tavily": {
-    "command": "npx",
-    "args": ["-y", "tavily-mcp"]
-  },
   "playwright": {
     "command": "npx",
-    "args": ["-y", "@playwright/mcp@latest"]
+    "args": ["-y", "@playwright/mcp@0.0.79"]
   }
 }
 ```
 
 **Context7** — library docs (stdio: `npx -y @upstash/context7-mcp`)
-**Tavily** — web search (verified: works without key, package is `tavily-mcp` not `@tavily/mcp`)
 **Playwright** — browser automation for live UI verification and e2e walk-throughs (Node 20+; headed by default, add `--headless` for automation)
 
 ### Tier 2 — Requires env keys
@@ -106,11 +108,16 @@ Combine all Tier 1 + Tier 2 + Trello blocks above. Omit any Tier 2 servers whose
 
 ## Loading the Full Spec
 
-`system/bootstrap.txt` is a **loader only**. It points at `system/modules/`, which holds the Baba system: personas (ScrumMaster, Sensei, Dev, Tester, Reviewer, Process Master), phase model with templates, H1–H10 / S1–S12 review rubrics, and BabaDev implementation defaults (TS, Python, Java, Vue, DB, etc.).
+`system/bootstrap.txt` is a **loader only**. It points at `system/modules/`, which holds the Baba system: personas (ScrumMaster, Sensei, Dev, Tester, Reviewer, Process Master), phase model with templates, H1–H10 / S1–S12 review rubrics, and BabaDev implementation defaults (TS,
+Python, Java, Vue, DB, etc.).
 
 **On startup:**
+
 1. Read `system/bootstrap.txt` (loader).
 2. Load always-on modules from `system/modules/12-module-routing.txt`.
 3. Load only the phase/persona modules the current session requires.
 4. Load `system/modules/30-execution-modes.txt` before deciding whether the
    formal phase model is useful.
+
+On hosts confirmed read-only, `system/modules/34-fileless-mode.txt` governs
+session behavior; on file-capable hosts it is inert.
