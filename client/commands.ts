@@ -11,6 +11,7 @@ import {
 } from 'vscode'
 import type { BinarySearchResult } from './findBinary'
 import type { VSCodeConfig } from './VSCodeConfig'
+import { executeBiomeCommand } from './tools/biome-executor'
 
 export enum BiomeCommands {
   ShowOutput = 'biome.showOutput',
@@ -68,79 +69,17 @@ export async function rageCommand(
   outputChannel: LogOutputChannel,
   vscodeConfig: VSCodeConfig,
 ) {
-  if (!binary) {
-    window.showErrorMessage("Biome binary not found. Cannot run 'rage'.")
-    return
-  }
-
-  const isWindows = os.platform() === 'win32'
-  const isNode = binary.loader === 'node'
-  const nodeCommand = resolveNodeCommand(
-    vscodeConfig.nodePath,
-    vscodeConfig.useExecPath,
-  )
-
-  outputChannel.show()
-  outputChannel.info("Running 'biome rage'...")
-
-  const serverEnv: Record<string, string> = {
-    ...process.env,
-    RUST_LOG: process.env.RUST_LOG || 'info',
-    BIOME_LOG: process.env.BIOME_LOG || 'info',
-    NO_COLOR: '1',
-  }
-
-  if (vscodeConfig.useExecPath) {
-    serverEnv.ELECTRON_RUN_AS_NODE = '1'
-  } else {
-    delete serverEnv.ELECTRON_RUN_AS_NODE
-  }
-
-  if (path.isAbsolute(nodeCommand)) {
-    const nodeDir = path.dirname(nodeCommand)
-    serverEnv.PATH = `${nodeDir}${isWindows ? ';' : ':'}${process.env.PATH ?? ''}`
-  }
-
-  const pnpArgs: string[] = []
-  if (isNode && binary.yarnPnpLoaderPath) {
-    pnpArgs.push('--require', binary.yarnPnpLoaderPath)
-    const esmLoaderPath = path.join(
-      path.dirname(binary.yarnPnpLoaderPath),
-      '.pnp.loader.mjs',
-    )
-    pnpArgs.push('--loader', esmLoaderPath)
-  }
-
-  let command: string
-  let args: string[]
-  let shell = false
-
-  if (isNode || vscodeConfig.useExecPath) {
-    command = nodeCommand
-    args = [...pnpArgs, binary.path, 'rage']
-  } else {
-    command = isWindows ? `"${binary.path}"` : binary.path
-    args = ['rage']
-    shell = isWindows
-  }
-
-  const options = {
-    cwd: workspace.workspaceFolders?.[0]?.uri.fsPath || os.homedir(),
-    env: serverEnv,
-    shell,
-  }
-
-  execFile(command, args, options, (error, stdout, stderr) => {
-    if (error) {
-      outputChannel.error(`'biome rage' failed: ${error.message}`)
-      if (stderr) {
-        outputChannel.error(stderr)
-      }
-      return
-    }
-    outputChannel.info('--- Biome Rage Output ---')
-    outputChannel.info(stdout)
-    outputChannel.info('--- End of Output ---')
+  await executeBiomeCommand({
+    binary,
+    vscodeConfig,
+    biomeArgs: ['rage'],
+    outputChannel,
+    commandLabel: 'Rage',
+    extraEnv: {
+      RUST_LOG: process.env.RUST_LOG || 'info',
+      BIOME_LOG: process.env.BIOME_LOG || 'info',
+    },
+    successMessage: undefined, // rage outputs to channel, no success toast
   })
 }
 
@@ -154,13 +93,6 @@ async function runBiomeOnProject(
   commandLabel: string,
   successMessage: string,
 ) {
-  if (!binary) {
-    window.showErrorMessage(
-      `Biome binary not found. Cannot ${commandLabel.toLowerCase()}.`,
-    )
-    return
-  }
-
   const activeEditor = window.activeTextEditor
   const workspaceFolder = activeEditor
     ? workspace.getWorkspaceFolder(activeEditor.document.uri)
@@ -173,74 +105,13 @@ async function runBiomeOnProject(
     return
   }
 
-  const isWindows = os.platform() === 'win32'
-  const isNode = binary.loader === 'node'
-  const nodeCommand = resolveNodeCommand(
-    vscodeConfig.nodePath,
-    vscodeConfig.useExecPath,
-  )
-
-  const serverEnv: Record<string, string> = {
-    ...process.env,
-    NO_COLOR: '1',
-  }
-
-  if (vscodeConfig.useExecPath) {
-    serverEnv.ELECTRON_RUN_AS_NODE = '1'
-  } else {
-    delete serverEnv.ELECTRON_RUN_AS_NODE
-  }
-
-  const pnpArgs: string[] = []
-  if (isNode && binary.yarnPnpLoaderPath) {
-    pnpArgs.push('--require', binary.yarnPnpLoaderPath)
-    const esmLoaderPath = path.join(
-      path.dirname(binary.yarnPnpLoaderPath),
-      '.pnp.loader.mjs',
-    )
-    pnpArgs.push('--loader', esmLoaderPath)
-  }
-
-  let command: string
-  let args: string[]
-  let shell = false
-
-  if (isNode || vscodeConfig.useExecPath) {
-    command = nodeCommand
-    args = [...pnpArgs, binary.path, ...biomeArgs]
-  } else {
-    command = isWindows ? `"${binary.path}"` : binary.path
-    args = [...biomeArgs]
-    shell = isWindows
-  }
-
-  const options = {
+  await executeBiomeCommand({
+    binary,
+    vscodeConfig,
+    biomeArgs,
     cwd: workspaceFolder.uri.fsPath,
-    env: serverEnv,
-    shell,
-  }
-
-  execFile(command, args, options, (error) => {
-    if (error) {
-      // It failed, so let's run it in a terminal for the user to see
-      const terminal = window.createTerminal({
-        name: `Biome ${commandLabel}`,
-        cwd: workspaceFolder.uri.fsPath,
-        env: serverEnv,
-      })
-
-      let terminalCommand: string
-      if (isNode || vscodeConfig.useExecPath) {
-        terminalCommand = `${nodeCommand} ${pnpArgs.join(' ')} "${binary.path}" ${biomeArgs.join(' ')}`
-      } else {
-        terminalCommand = `${isWindows ? `"${binary.path}"` : binary.path} ${biomeArgs.join(' ')}`
-      }
-
-      terminal.show()
-      terminal.sendText(terminalCommand)
-      return
-    }
-    window.showInformationMessage(successMessage)
+    commandLabel,
+    successMessage,
   })
 }
 

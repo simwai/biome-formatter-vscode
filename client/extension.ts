@@ -26,6 +26,28 @@ const tools: ToolInterface[] = []
 
 tools.push(new BiomeTool())
 
+const restartTool = async (
+  tool: ToolInterface,
+  outputChannel: LogOutputChannel,
+  configService: ConfigService,
+  statusBarItemHandler: StatusBarItemHandler,
+) => {
+  try {
+    await tool.deactivate()
+    const newBinaryPath = await tool.getBinary(outputChannel, configService)
+    await tool.activate(
+      outputChannel,
+      configService,
+      statusBarItemHandler,
+      newBinaryPath,
+    )
+  } catch (e) {
+    outputChannel.error(`Failed to restart tool, error: ${e instanceof Error ? e.message : String(e)}.
+    Try to restart the editor manually.
+    `)
+  }
+}
+
 export async function activate(context: ExtensionContext) {
   const configManager = new ConfigManager(context.globalState)
   const configService = new ConfigService()
@@ -50,7 +72,12 @@ export async function activate(context: ExtensionContext) {
   const restartServerCommand = commands.registerCommand(
     BiomeCommands.Restart,
     async () => {
-      await restartTool(biomeTool, outputChannel)
+      await restartTool(
+        biomeTool,
+        outputChannel,
+        configService,
+        statusBarItemHandler,
+      )
     },
   )
 
@@ -185,30 +212,15 @@ export async function activate(context: ExtensionContext) {
     statusBarItemHandler,
   )
 
-  const restartTool = async (
-    tool: ToolInterface,
-    outputChannel: LogOutputChannel,
-  ) => {
-    try {
-      await tool.deactivate()
-      const newBinaryPath = await tool.getBinary(outputChannel, configService)
-      await tool.activate(
-        outputChannel,
-        configService,
-        statusBarItemHandler,
-        newBinaryPath,
-      )
-    } catch (e) {
-      outputChannel.error(`Failed to restart tool, error: ${e instanceof Error ? e.message : String(e)}.
-      Try to restart the editor manually.
-      `)
-    }
-  }
-
   configService.onConfigChange = async function onConfigChange(event) {
     if (configService.vsCodeConfig.effectsBiomeConnection(event)) {
       outputChannel.info('biome connection changed, restarting biome tool.')
-      await restartTool(tools[0], outputChannel)
+      await restartTool(
+        tools[0],
+        outputChannel,
+        configService,
+        statusBarItemHandler,
+      )
     } else {
       await Promise.all(
         tools.map((tool) =>
