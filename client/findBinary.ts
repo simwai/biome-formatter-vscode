@@ -427,20 +427,27 @@ const safeSpawnSync = (
 /**
  * Search for the bundled biome binary in the extension's own out/biome-bin/ directory.
  * This is used as a fallback when no other strategy finds a biome binary.
- * The binary is copied there at build time by scripts/copy-biome-binary.js.
- * Only Windows is supported for bundled binaries.
+ * The binary is copied there at build time by scripts/copy-biome-binary.js
+ * (see copyAllPlatformBinaries): per-platform subdirs plus a flat host copy.
  */
 export async function searchBundledBiomeBin(): Promise<
   BinarySearchResult | undefined
 > {
   const binaryName = process.platform === 'win32' ? 'biome.exe' : 'biome'
-  const bundlePath = path.join(__dirname, 'biome-bin', binaryName)
-  try {
-    await access(bundlePath, constants.F_OK)
-    return { path: bundlePath, loader: 'native' }
-  } catch {
-    return undefined
+  const platformArch = `${process.platform}-${process.arch}`
+  const candidates = [
+    path.join(__dirname, 'biome-bin', platformArch, binaryName),
+    path.join(__dirname, 'biome-bin', binaryName),
+  ]
+  for (const bundlePath of candidates) {
+    try {
+      await access(bundlePath, constants.F_OK)
+      return { path: bundlePath, loader: 'native' }
+    } catch {
+      // try next candidate
+    }
   }
+  return undefined
 }
 
 /**

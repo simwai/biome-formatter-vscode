@@ -52,32 +52,9 @@ export function buildBiomeExecutionConfig(
     vscodeConfig.useExecPath,
   )
 
-  const serverEnv: Record<string, string> = {
-    ...process.env,
-    ...extraEnv,
-    NO_COLOR: '1',
-  }
+  const serverEnv = buildBiomeServerEnv(vscodeConfig, extraEnv)
 
-  if (vscodeConfig.useExecPath) {
-    serverEnv.ELECTRON_RUN_AS_NODE = '1'
-  } else {
-    delete serverEnv.ELECTRON_RUN_AS_NODE
-  }
-
-  if (path.isAbsolute(nodeCommand)) {
-    const nodeDir = path.dirname(nodeCommand)
-    serverEnv.PATH = `${nodeDir}${isWindows ? ';' : ':'}${process.env.PATH ?? ''}`
-  }
-
-  const pnpArgs: string[] = []
-  if (isNode && binary.yarnPnpLoaderPath) {
-    pnpArgs.push('--require', binary.yarnPnpLoaderPath)
-    const esmLoaderPath = path.join(
-      path.dirname(binary.yarnPnpLoaderPath),
-      '.pnp.loader.mjs',
-    )
-    pnpArgs.push('--loader', esmLoaderPath)
-  }
+  const pnpArgs = buildPnpArgs(binary)
 
   let command: string
   let args: string[]
@@ -166,12 +143,7 @@ export async function executeBiomeCommand(
             env: config.options.env,
           })
 
-          let terminalCommand: string
-          if (config.options.shell) {
-            terminalCommand = `${config.command} ${config.args.join(' ')}`
-          } else {
-            terminalCommand = `${config.command} ${config.args.join(' ')}`
-          }
+          const terminalCommand = `${config.command} ${config.args.join(' ')}`
 
           terminal.show()
           terminal.sendText(terminalCommand)
@@ -198,6 +170,48 @@ function resolveNodeCommand(nodePath?: string, useExecPath?: boolean): string {
   return nodePath || 'node'
 }
 
+export function buildBiomeServerEnv(
+  vscodeConfig: VSCodeConfig,
+  extraEnv: Record<string, string> = {},
+): Record<string, string> {
+  const nodeCommand = resolveNodeCommand(
+    vscodeConfig.nodePath,
+    vscodeConfig.useExecPath,
+  )
+
+  const serverEnv: Record<string, string> = {
+    ...process.env,
+    ...extraEnv,
+    NO_COLOR: '1',
+  }
+
+  if (vscodeConfig.useExecPath) {
+    serverEnv.ELECTRON_RUN_AS_NODE = '1'
+  } else {
+    delete serverEnv.ELECTRON_RUN_AS_NODE
+  }
+
+  if (path.isAbsolute(nodeCommand)) {
+    const nodeDir = path.dirname(nodeCommand)
+    serverEnv.PATH = `${nodeDir}${os.platform() === 'win32' ? ';' : ':'}${process.env.PATH ?? ''}`
+  }
+
+  return serverEnv
+}
+
+export function buildPnpArgs(binary: BinarySearchResult): string[] {
+  const pnpArgs: string[] = []
+  if (binary.loader === 'node' && binary.yarnPnpLoaderPath) {
+    pnpArgs.push('--require', binary.yarnPnpLoaderPath)
+    const esmLoaderPath = path.join(
+      path.dirname(binary.yarnPnpLoaderPath),
+      '.pnp.loader.mjs',
+    )
+    pnpArgs.push('--loader', esmLoaderPath)
+  }
+  return pnpArgs
+}
+
 /**
  * Builds the Executable configuration for LanguageClient.
  * This is the LSP-specific variant that returns an Executable object.
@@ -221,34 +235,13 @@ export function buildLspExecutable(
     vscodeConfig.useExecPath,
   )
 
-  const serverEnv: Record<string, string> = {
-    ...process.env,
-    ...extraEnv,
+  const serverEnv = buildBiomeServerEnv(vscodeConfig, {
     RUST_LOG: process.env.RUST_LOG || 'info',
     BIOME_LOG: process.env.BIOME_LOG || 'info',
-    NO_COLOR: '1',
-  }
+    ...extraEnv,
+  })
 
-  if (vscodeConfig.useExecPath) {
-    serverEnv.ELECTRON_RUN_AS_NODE = '1'
-  } else {
-    delete serverEnv.ELECTRON_RUN_AS_NODE
-  }
-
-  if (path.isAbsolute(nodeCommand)) {
-    const nodeDir = path.dirname(nodeCommand)
-    serverEnv.PATH = `${nodeDir}${os.platform() === 'win32' ? ';' : ':'}${process.env.PATH ?? ''}`
-  }
-
-  const pnpArgs: string[] = []
-  if (isNode && binary.yarnPnpLoaderPath) {
-    pnpArgs.push('--require', binary.yarnPnpLoaderPath)
-    const esmLoaderPath = path.join(
-      path.dirname(binary.yarnPnpLoaderPath),
-      '.pnp.loader.mjs',
-    )
-    pnpArgs.push('--loader', esmLoaderPath)
-  }
+  const pnpArgs = buildPnpArgs(binary)
 
   if (isNode || vscodeConfig.useExecPath) {
     return {

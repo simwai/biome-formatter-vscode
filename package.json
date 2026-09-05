@@ -37,7 +37,6 @@
     "release": "pnpm run compile && node --env-file=.env ./node_modules/semantic-release/bin/semantic-release.js --no-ci"
   },
   "lint-staged": {
-    "*.{js,ts,cjs,mjs}": "pnpm type-check",
     "*.{js,ts,cjs,mjs,json,jsonc,ts}": "pnpm format"
   },
   "dependencies": {

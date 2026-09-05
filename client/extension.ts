@@ -60,100 +60,100 @@ export async function activate(context: ExtensionContext) {
     context.extension.packageJSON?.version,
   )
 
-  const biomeTool = tools[0] as BiomeTool
+  const biomeTool =
+    tools.find((tool): tool is BiomeTool => tool instanceof BiomeTool) ??
+    (tools[0] as BiomeTool)
 
-  const showOutputCommand = commands.registerCommand(
-    BiomeCommands.ShowOutput,
-    () => {
-      outputChannel.show()
-    },
-  )
+  type CommandHandler = (...args: unknown[]) => unknown
 
-  const restartServerCommand = commands.registerCommand(
-    BiomeCommands.Restart,
-    async () => {
-      await restartTool(
-        biomeTool,
-        outputChannel,
-        configService,
-        statusBarItemHandler,
-      )
+  const COMMAND_REGISTRATIONS: {
+    id: BiomeCommands
+    handler: CommandHandler
+  }[] = [
+    { id: BiomeCommands.ShowOutput, handler: () => outputChannel.show() },
+    {
+      id: BiomeCommands.Restart,
+      handler: () =>
+        restartTool(
+          biomeTool,
+          outputChannel,
+          configService,
+          statusBarItemHandler,
+        ),
     },
-  )
+    {
+      id: BiomeCommands.ToggleEnabled,
+      handler: () =>
+        configService.vsCodeConfig.updateEnableBiome(
+          !configService.vsCodeConfig.enableBiome,
+        ),
+    },
+    {
+      id: BiomeCommands.ApplyAllFixes,
+      handler: () => biomeTool.applyAllFixesFile(),
+    },
+    {
+      id: BiomeCommands.FormatProject,
+      handler: async () =>
+        formatProjectCommand(
+          await biomeTool.getBinary(outputChannel, configService),
+          configService.vsCodeConfig,
+        ),
+    },
+    {
+      id: BiomeCommands.FixProject,
+      handler: async () =>
+        fixProjectCommand(
+          await biomeTool.getBinary(outputChannel, configService),
+          configService.vsCodeConfig,
+        ),
+    },
+    {
+      id: BiomeCommands.FixProjectUnsafe,
+      handler: async () =>
+        fixProjectUnsafeCommand(
+          await biomeTool.getBinary(outputChannel, configService),
+          configService.vsCodeConfig,
+        ),
+    },
+    { id: BiomeCommands.OpenConfig, handler: () => openConfigCommand() },
+    {
+      id: BiomeCommands.CopyDebugInfo,
+      handler: () =>
+        copyDebugCommand(
+          context.extension.packageJSON?.version ?? 'unknown',
+          biomeTool.getLspVersion() ?? 'unknown',
+          configService.vsCodeConfig,
+        ),
+    },
+    {
+      id: BiomeCommands.Rage,
+      handler: async () =>
+        rageCommand(
+          await biomeTool.getBinary(outputChannel, configService),
+          outputChannel,
+          configService.vsCodeConfig,
+        ),
+    },
+    {
+      id: BiomeCommands.AddCustomConfig,
+      handler: () =>
+        ConfigWebview.render(context.extensionUri, configManager, 'editor'),
+    },
+    {
+      id: BiomeCommands.SpawnConfig,
+      handler: () =>
+        ConfigWebview.render(context.extensionUri, configManager, 'picker'),
+    },
+    {
+      id: BiomeCommands.OpenConfigManager,
+      handler: () =>
+        ConfigWebview.render(context.extensionUri, configManager, 'picker'),
+    },
+  ]
 
-  const toggleEnableCommand = commands.registerCommand(
-    BiomeCommands.ToggleEnabled,
-    async () => {
-      await configService.vsCodeConfig.updateEnableBiome(
-        !configService.vsCodeConfig.enableBiome,
-      )
-    },
-  )
-
-  const applyAllFixesFileCommand = commands.registerCommand(
-    BiomeCommands.ApplyAllFixes,
-    async () => {
-      await biomeTool.applyAllFixesFile()
-    },
-  )
-
-  const formatProjectCommandRegistration = commands.registerCommand(
-    BiomeCommands.FormatProject,
-    async () => {
-      await formatProjectCommand(
-        await biomeTool.getBinary(outputChannel, configService),
-        configService.vsCodeConfig,
-      )
-    },
-  )
-
-  const fixProjectCommandRegistration = commands.registerCommand(
-    BiomeCommands.FixProject,
-    async () => {
-      await fixProjectCommand(
-        await biomeTool.getBinary(outputChannel, configService),
-        configService.vsCodeConfig,
-      )
-    },
-  )
-
-  const fixProjectUnsafeCommandRegistration = commands.registerCommand(
-    BiomeCommands.FixProjectUnsafe,
-    async () => {
-      await fixProjectUnsafeCommand(
-        await biomeTool.getBinary(outputChannel, configService),
-        configService.vsCodeConfig,
-      )
-    },
-  )
-
-  const openConfigCommandRegistration = commands.registerCommand(
-    BiomeCommands.OpenConfig,
-    async () => {
-      await openConfigCommand()
-    },
-  )
-
-  const copyDebugInfoCommand = commands.registerCommand(
-    BiomeCommands.CopyDebugInfo,
-    async () => {
-      await copyDebugCommand(
-        context.extension.packageJSON?.version ?? 'unknown',
-        biomeTool.getLspVersion() ?? 'unknown',
-        configService.vsCodeConfig,
-      )
-    },
-  )
-
-  const rageCommandRegistration = commands.registerCommand(
-    BiomeCommands.Rage,
-    async () => {
-      await rageCommand(
-        await biomeTool.getBinary(outputChannel, configService),
-        outputChannel,
-        configService.vsCodeConfig,
-      )
-    },
+  const commandDisposables = COMMAND_REGISTRATIONS.map(({ id, handler }) =>
+    commands.registerCommand(id, handler),
   )
 
   const onDidChangeWorkspaceFoldersDispose =
@@ -170,41 +170,8 @@ export async function activate(context: ExtensionContext) {
     biomeTool.updateStatusBar(statusBarItemHandler, configService)
   })
 
-  const addCustomConfigCommand = commands.registerCommand(
-    BiomeCommands.AddCustomConfig,
-    () => {
-      ConfigWebview.render(context.extensionUri, configManager, 'editor')
-    },
-  )
-
-  const spawnConfigCommand = commands.registerCommand(
-    BiomeCommands.SpawnConfig,
-    () => {
-      ConfigWebview.render(context.extensionUri, configManager, 'picker')
-    },
-  )
-
-  const openConfigManagerCommand = commands.registerCommand(
-    BiomeCommands.OpenConfigManager,
-    () => {
-      ConfigWebview.render(context.extensionUri, configManager, 'picker')
-    },
-  )
-
   context.subscriptions.push(
-    addCustomConfigCommand,
-    spawnConfigCommand,
-    openConfigManagerCommand,
-    showOutputCommand,
-    restartServerCommand,
-    toggleEnableCommand,
-    applyAllFixesFileCommand,
-    formatProjectCommandRegistration,
-    fixProjectCommandRegistration,
-    fixProjectUnsafeCommandRegistration,
-    openConfigCommandRegistration,
-    copyDebugInfoCommand,
-    rageCommandRegistration,
+    ...commandDisposables,
     configService,
     outputChannel,
     onDidChangeWorkspaceFoldersDispose,
@@ -216,7 +183,7 @@ export async function activate(context: ExtensionContext) {
     if (configService.vsCodeConfig.effectsBiomeConnection(event)) {
       outputChannel.info('biome connection changed, restarting biome tool.')
       await restartTool(
-        tools[0],
+        biomeTool,
         outputChannel,
         configService,
         statusBarItemHandler,
@@ -233,8 +200,8 @@ export async function activate(context: ExtensionContext) {
   outputChannel.info('Searching for biome binary.')
 
   try {
-    const binaryPath = await tools[0].getBinary(outputChannel, configService)
-    await tools[0].activate(
+    const binaryPath = await biomeTool.getBinary(outputChannel, configService)
+    await biomeTool.activate(
       outputChannel,
       configService,
       statusBarItemHandler,

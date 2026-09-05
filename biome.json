@@ -6,7 +6,9 @@
   "files": {
     "ignoreUnknown": true,
     "includes": [
-      "src",
+      "client",
+      "tests",
+      "scripts",
       "**/*",
       "!!.vscode-test",
       "!!node_modules",
