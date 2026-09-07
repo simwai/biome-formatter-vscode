@@ -6,6 +6,7 @@ suite('lsp_helper', () => {
     const binary = { path: '/path/to/biome', loader: 'native' as const }
     const executable = runExecutable(binary, false)
     ok(executable.command.includes('/path/to/biome'))
+    ok(executable.args)
     strictEqual(executable.args.length, 1)
     strictEqual(executable.args[0], 'lsp-proxy')
   })

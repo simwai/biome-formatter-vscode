@@ -33,6 +33,7 @@
     "start": "pnpm run watch",
     "watch": "pnpm run compile -- --watch",
     "build": "pnpm run package",
+    "pre-push": "pnpm run type-check",
     "install-extension": "pnpm run build && code --install-extension biome_formatter.vsix --force",
     "release": "pnpm run compile && node --env-file=.env ./node_modules/semantic-release/bin/semantic-release.js --no-ci"
   },
