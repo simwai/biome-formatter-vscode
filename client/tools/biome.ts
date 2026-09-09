@@ -30,7 +30,6 @@ export default class BiomeTool implements ToolInterface {
   private client: LanguageClient | undefined
   private disposeResources: (() => Promise<void>) | undefined
 
-  // Reconnection state
   private configService: ConfigService | undefined
   private outputChannel: LogOutputChannel | undefined
   private statusBarItemHandler: StatusBarItemHandler | undefined
@@ -65,11 +64,9 @@ export default class BiomeTool implements ToolInterface {
     statusBarItemHandler: StatusBarItemHandler,
     binary?: BinarySearchResult,
   ): Promise<void> {
-    // Store references for reconnection logic
     this.configService = configService
     this.outputChannel = outputChannel
     this.statusBarItemHandler = statusBarItemHandler
-    // Reset reconnection state on fresh activation
     this.isManuallyStopped = false
     this.reconnectAttempts = 0
     this.isReconnecting = false
@@ -157,7 +154,6 @@ export default class BiomeTool implements ToolInterface {
       },
     )
 
-    // Listen for connection state changes to trigger auto-reconnect
     this.stateChangeDisposable = this.client.onDidChangeState(
       (e: StateChangeEvent) => this.onStateChange(e),
     )
@@ -301,7 +297,7 @@ export default class BiomeTool implements ToolInterface {
       try {
         await fn()
       } catch {
-        // Swallow errors during flush - connection may still be unstable
+        // why: the connection may still be unstable, so a failing flush must not break reconnection.
       }
     }
   }

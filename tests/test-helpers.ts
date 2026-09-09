@@ -69,7 +69,7 @@ export async function activateExtension(full: boolean = true): Promise<void> {
   }
 
   if (full) {
-    // wait for initialized requests
+    // why: the language client needs a moment to finish initialization.
     await sleep(250)
   }
 }

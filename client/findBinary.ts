@@ -15,26 +15,19 @@ export interface BinarySearchResult {
 }
 
 /**
- * Validates the given path is safe to use.
- * Returns true if the path is safe, false otherwise.
- *
- * Current safety checks:
- * - No directory traversal (..)
- * - No malicious characters (&, |, ;, $, <, >, `, \r, \n)
+ * Returns true only for binary paths that stay inside their directory,
+ * contain no shell metacharacters, and name the biome binary.
  */
 export function validateSafeBinaryPath(binaryPath: string): boolean {
-  // Check for directory traversal
   if (binaryPath.includes('..')) {
     return false
   }
 
-  // Check for malicious characters
   const maliciousChars = /[&|;$<>`\r\n]/
   if (maliciousChars.test(binaryPath)) {
     return false
   }
 
-  // Check for case-insensitive versions of 'biome'
   const lowerPath = binaryPath.toLowerCase()
   if (!lowerPath.includes('biome')) {
     return false
@@ -48,8 +41,7 @@ export function replaceTargetFromMainToBin(
   resolvedPath: string,
   binaryName: string,
 ): string {
-  // Walk up from the resolved main file to find the nearest package.json
-  // and use its "bin" entry to get the actual binary path
+  // why: the owning package.json can sit any number of levels above the resolved file.
   let dir = path.dirname(resolvedPath)
   while (dir !== path.dirname(dir)) {
     let rawContent: string
@@ -59,7 +51,6 @@ export function replaceTargetFromMainToBin(
       dir = path.dirname(dir)
       continue
     }
-    // Found the package.json — stop walking up here
     const packageJson: { bin?: string | Record<string, string> } =
       JSON.parse(rawContent)
     const binEntry =
@@ -130,13 +121,12 @@ export function clearWorkspacePackageJsonNodeModulesCache(): void {
 }
 
 /**
- * Search for the binary in all workspaces' node_modules/.bin directories.
- * If multiple workspaces contain the binary, the first one found is returned.
+ * Searches for the binary in the node_modules bin directories of every
+ * workspace folder. When several folders contain the binary, the first match wins.
  */
 export async function searchProjectNodeModulesBin(
   binaryName: string,
 ): Promise<BinarySearchResult | undefined> {
-  // try to find shared binary inside `node_modules/.bin` of each workspace folder
   const workspaceNodeModules = (workspace.workspaceFolders ?? []).map(
     (folder) => path.join(folder.uri.fsPath, 'node_modules'),
   )
@@ -148,7 +138,7 @@ export async function searchProjectNodeModulesBin(
     return result
   }
 
-  // fallback to searching for package.json in workspace subfolders (monorepo support)
+  // why: monorepo packages keep their own node_modules below the workspace root.
   const packageJsonNodeModules = await getWorkspacePackageJsonNodeModules()
   const result2 = await searchNodeModulesDefaultBinPath(
     binaryName,
@@ -158,7 +148,7 @@ export async function searchProjectNodeModulesBin(
     return result2
   }
 
-  // fallback to direct binary lookup via require.resolve
+  // why: the direct lookup is the last local option before giving up on project binaries.
   try {
     const resolvedPath = replaceTargetFromMainToBin(
       require.resolve(binaryName, {
@@ -185,11 +175,11 @@ function isPnpApi(value: unknown): value is PnpApi {
 }
 
 /**
- * Walk up from startDir to find and load a Yarn PnP API (.pnp.cjs or .pnp.js).
+ * Walks up from the start directory to find and load a Yarn PnP runtime.
  * Returns the PnP API object and the absolute path to the loader file.
  *
- * SECURITY: This function executes JavaScript via require().
- * Callers MUST verify workspace.isTrusted before invoking.
+ * Loading executes third-party JavaScript, so callers must only invoke this
+ * in trusted workspaces.
  */
 function findPnpApi(
   startDir: string,
@@ -204,7 +194,7 @@ function findPnpApi(
           return { api: loaded, loaderPath: pnpFilePath }
         }
       } catch {
-        // file doesn't exist or failed to load, try next
+        // why: most levels have no PnP file, so keep climbing instead of failing.
       }
     }
     dir = path.dirname(dir)
@@ -213,10 +203,9 @@ function findPnpApi(
 }
 
 /**
- * Search for the binary using Yarn PnP resolution.
- * Loads .pnp.cjs/.pnp.js from the workspace (searching upward for monorepo support)
- * and uses pnpapi.resolveRequest() to locate the package.
- * Returns both the binary path and the PnP loader path (needed for --require injection).
+ * Searches for the binary through Yarn PnP resolution, climbing toward the
+ * workspace root so monorepos resolve. Returns the binary path together with
+ * the PnP loader path needed for require injection.
  */
 export async function searchYarnPnpBin(
   binaryName: string,
@@ -253,21 +242,20 @@ export async function searchYarnPnpBin(
 }
 
 /**
- * Search for the binary in global node_modules.
- * Returns undefined if not found.
+ * Searches for the binary in the global package directories.
+ * Returns undefined when nothing is found.
  */
 export async function searchGlobalNodeModulesBin(
   binaryName: string,
 ): Promise<BinarySearchResult | undefined> {
   const globalPaths = globalNodeModulesPaths()
 
-  // try to find shared binary inside `node_modules/.bin`
   const result = await searchNodeModulesDefaultBinPath(binaryName, globalPaths)
   if (result) {
     return result
   }
 
-  // fallback to direct binary lookup via require.resolve
+  // why: a globally linked binary is the last option before searching the system PATH.
   try {
     const resolvedPath = replaceTargetFromMainToBin(
       require.resolve(binaryName, { paths: globalPaths }),
@@ -278,8 +266,8 @@ export async function searchGlobalNodeModulesBin(
 }
 
 /**
- * Search for the binary in the PATH.
- * Returns undefined if not found.
+ * Searches for the binary on the system PATH.
+ * Returns undefined when nothing is found.
  */
 export async function searchEnvPath(
   defaultBinaryName: string,
@@ -290,10 +278,8 @@ export async function searchEnvPath(
     return undefined
   }
 
-  // generate candidate paths by joining each PATH entry with the binary name
-  // on Windows, also consider the .exe extension
   const candidates = envPath.split(path.delimiter).flatMap((folder) => {
-    // filter out empty entries which can occur if PATH starts or ends with a delimiter
+    // why: a leading or trailing delimiter yields empty segments with no folder to probe.
     if (!folder) {
       return []
     }
@@ -319,9 +305,9 @@ export async function searchEnvPath(
 }
 
 /**
- * Search for the binary based on user settings.
- * If the path is relative, it is resolved against the first workspace folder.
- * Returns undefined if no valid binary is found or the path is unsafe.
+ * Resolves the user-configured binary path, treating relative paths as
+ * relative to the first workspace folder. Returns undefined when the path is
+ * unsafe or points nowhere.
  */
 export async function searchSettingsBin(
   defaultBinaryName: string,
@@ -331,7 +317,6 @@ export async function searchSettingsBin(
     return
   }
 
-  // validates the given path is safe to use
   if (!validateSafeBinaryPath(settingsBinary)) {
     return undefined
   }
@@ -343,12 +328,11 @@ export async function searchSettingsBin(
     if (!cwd) {
       return undefined
     }
-    // if the path is not absolute, resolve it to the first workspace folder
+    // why: resolve the setting against the only workspace guaranteed to exist.
     resolvedPath = path.normalize(path.join(cwd, resolvedPath))
   }
 
   if (process.platform !== 'win32' && resolvedPath.endsWith('.exe')) {
-    // on non-Windows, remove `.exe` extension if present
     resolvedPath = resolvedPath.slice(0, -4)
   }
 
@@ -365,7 +349,7 @@ export async function searchSettingsBin(
     return { path: resolvedPath, loader: isNode ? 'node' : 'native' }
   } catch {}
 
-  // on Windows, also check for `.exe` extension (bun uses `.exe` for its binaries)
+  // why: some runtimes ship Windows binaries with an exe suffix, so probe it before giving up.
   if (process.platform === 'win32') {
     if (!resolvedPath.endsWith('.exe')) {
       resolvedPath += '.exe'
@@ -377,11 +361,11 @@ export async function searchSettingsBin(
     } catch {}
   }
 
-  // no valid binary found
   return undefined
 }
 
-// copied from: https://github.com/biomejs/biome-vscode/blob/ae9b6df2254d0ff8ee9d626554251600eb2ca118/src/locator.ts#L28-L49
+// adapted from the global-modules locator in the official Biome extension:
+// https://github.com/biomejs/biome-vscode/blob/ae9b6df2254d0ff8ee9d626554251600eb2ca118/src/locator.ts#L28-L49
 function globalNodeModulesPaths(): string[] {
   const npmGlobalNodeModulesPath = safeSpawnSync('npm', ['root', '-g'])
   const pnpmGlobalNodeModulesPath = safeSpawnSync('pnpm', ['root', '-g'])
@@ -397,8 +381,7 @@ function globalNodeModulesPaths(): string[] {
   ].filter(Boolean) as string[]
 }
 
-// only use this function with internal code, because it executes shell commands
-// which could be a security risk if the command or args are user-controlled
+// safety: call only with internal constant commands, never with user-controlled input.
 const safeSpawnSync = (
   command: string,
   args: readonly string[] = [],
@@ -425,10 +408,8 @@ const safeSpawnSync = (
 }
 
 /**
- * Search for the bundled biome binary in the extension's own out/biome-bin/ directory.
- * This is used as a fallback when no other strategy finds a biome binary.
- * The binary is copied there at build time by scripts/copy-biome-binary.js
- * (see copyAllPlatformBinaries): per-platform subdirs plus a flat host copy.
+ * Falls back to the biome binary bundled with the extension, preferring the
+ * per-platform subdirectory written by the copy script over the legacy flat copy.
  */
 export async function searchBundledBiomeBin(): Promise<
   BinarySearchResult | undefined
@@ -444,21 +425,20 @@ export async function searchBundledBiomeBin(): Promise<
       await access(bundlePath, constants.F_OK)
       return { path: bundlePath, loader: 'native' }
     } catch {
-      // try next candidate
+      // why: the first candidate simply may not exist, so fall through to the next.
     }
   }
   return undefined
 }
 
 /**
- * Search for the binary in the extension's own node_modules.
- * This is used as a final fallback.
+ * Searches for the binary in the extension's own dependencies as a final fallback.
  */
 export async function searchExtensionNodeModulesBin(
   binaryName: string,
 ): Promise<BinarySearchResult | undefined> {
   try {
-    // In the extension context, require.resolve("@biomejs/biome") will find the bundled version
+    // why: inside the extension host this resolves the bundled copy.
     const resolvedPath = replaceTargetFromMainToBin(
       require.resolve('@biomejs/biome'),
       binaryName,
@@ -470,12 +450,12 @@ export async function searchExtensionNodeModulesBin(
 }
 
 /**
- * Checks whether a file at the given path is actually executable.
+ * Reports whether the file at the given path can actually be executed.
  *
- * On Unix: uses fs.access with X_OK.
- * On Windows: X_OK is not meaningful, so we fall back to checking existence
- * while explicitly rejecting .cmd shims — these pass stat() but cause
- * internalError/io (os error 5) when the Biome LSP tries to spawn them.
+ * Unix probes execute permission directly. On Windows that probe is
+ * meaningless, so existence is checked instead while command shims are
+ * rejected, since those pass the existence probe but crash the language
+ * server on startup.
  */
 export async function isExecutable(filePath: string): Promise<boolean> {
   try {
@@ -495,20 +475,12 @@ export async function isExecutable(filePath: string): Promise<boolean> {
 }
 
 /**
- * Tries each binary search strategy in priority order and returns the first
- * result whose path passes the executable check.
+ * Tries each binary search strategy in priority order, starting with the
+ * user setting and ending with the bundled extension copy, and returns the
+ * first result that passes the executable check.
  *
- * This prevents returning Windows .bin shims or other non-executable files
- * that exist on disk but would cause the LSP server to crash on startup.
- *
- * Priority order:
- *  1. User settings (explicit path always wins)
- *  2. Project-local node_modules
- *  3. Yarn PnP
- *  4. Global node_modules (npm / pnpm / bun)
- *  5. PATH
- *  6. Bundled extension binary
- *  7. Extension node_modules (last resort)
+ * The check exists because stale bin shims pass a plain existence probe but
+ * crash the language server on startup.
  */
 export async function findExecutableBinary(
   binaryName: string,

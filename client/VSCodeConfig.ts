@@ -113,9 +113,7 @@ export class VSCodeConfig implements VSCodeConfigInterface {
     return this.configuration.update('enabledLanguages', value)
   }
 
-  /**
-   * These configuration changes need a complete restart of the language server
-   */
+  // why: these settings change the process spawn itself, so the server restarts instead of hot-updating.
   private effectsGeneralLSPConnection(
     event: ConfigurationChangeEvent,
   ): boolean {
@@ -139,31 +137,31 @@ export class VSCodeConfig implements VSCodeConfigInterface {
 type TraceLevel = 'off' | 'messages' | 'verbose'
 
 /**
- * See `"contributes.configuration"` in `package.json`
+ * Mirrors contributes.configuration in package.json.
  */
 interface VSCodeConfigInterface {
   /**
-   * `biome.enable`
+   * biome.enable
    * @default true
    */
   enableBiome: boolean
   /**
-   * Trace VSCode <-> Biome Language Server communication
-   * `biome.trace.server`
+   * Trace communication between VSCode and the Biome language server.
+   * biome.trace.server
    *
    * @default 'off'
    */
   trace: TraceLevel
   /**
-   * Path to the `biome` binary
-   * `biome.path.biome`
+   * Path to the biome binary.
+   * biome.path.biome
    * @default undefined
    */
   binPathBiome: string | undefined
 
   /**
-   * Path to a JavaScript runtime binary (Node.js, bun, or deno)
-   * `biome.path.node`
+   * Path to a JavaScript runtime binary (Node.js, bun, or deno).
+   * biome.path.node
    * @default undefined
    */
   nodePath: string | undefined
@@ -175,15 +173,15 @@ interface VSCodeConfigInterface {
   useExecPath: boolean
 
   /**
-   * Start the language server only when a `biome.json` file exists in one of the workspaces.
-   * `biome.requireConfig`
+   * Start the language server only when a biome.json file exists in one of the workspaces.
+   * biome.requireConfig
    * @default true
    */
   requireConfig: boolean
 
   /**
    * The languages that Biome should be enabled for.
-   * `biome.enabledLanguages`
+   * biome.enabledLanguages
    */
   enabledLanguages: string[]
 }

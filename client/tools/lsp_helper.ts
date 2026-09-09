@@ -1,6 +1,9 @@
-import { type Executable } from 'vscode-languageclient/node'
-import { MessageType, type ShowMessageParams } from 'vscode-languageclient/node'
 import { type LogOutputChannel, window } from 'vscode'
+import {
+  type Executable,
+  MessageType,
+  type ShowMessageParams,
+} from 'vscode-languageclient/node'
 import type { BinarySearchResult } from '../findBinary'
 import type { VSCodeConfig } from '../VSCodeConfig'
 import { buildLspExecutable } from './biome-executor'
@@ -31,7 +34,6 @@ export function runExecutable(
     extraEnv,
   )
 
-  // Convert to Executable type
   const executable: Executable = {
     command,
     args,

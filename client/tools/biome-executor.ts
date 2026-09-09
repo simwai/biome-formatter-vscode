@@ -81,8 +81,8 @@ export function buildBiomeExecutionConfig(
 }
 
 /**
- * Executes a Biome command and handles the result.
- * If the command fails, opens a terminal with the command for user visibility.
+ * Runs a Biome CLI command and shows the result, falling back to a visible
+ * terminal when the command fails.
  */
 export async function executeBiomeCommand(
   options: BiomeExecutorOptions & {
@@ -136,7 +136,7 @@ export async function executeBiomeCommand(
             }
           }
 
-          // On failure, run in terminal for user visibility
+          // why: surface the failing command where the user can see and rerun it.
           const terminal = window.createTerminal({
             name: `Biome ${commandLabel || 'Command'}`,
             cwd: config.options.cwd,
@@ -170,6 +170,10 @@ function resolveNodeCommand(nodePath?: string, useExecPath?: boolean): string {
   return nodePath || 'node'
 }
 
+/**
+ * Builds the environment for spawning Biome, wiring the Node directory into
+ * PATH and opting out of the Electron runtime unless requested.
+ */
 export function buildBiomeServerEnv(
   vscodeConfig: VSCodeConfig,
   extraEnv: Record<string, string> = {},
@@ -199,6 +203,9 @@ export function buildBiomeServerEnv(
   return serverEnv
 }
 
+/**
+ * Builds the Node flags that load the Yarn PnP runtime for binaries installed through PnP.
+ */
 export function buildPnpArgs(binary: BinarySearchResult): string[] {
   const pnpArgs: string[] = []
   if (binary.loader === 'node' && binary.yarnPnpLoaderPath) {

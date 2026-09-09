@@ -72,8 +72,7 @@ export class Validator {
     // biome-ignore lint/suspicious/noExplicitAny: JSON.parse result needs dynamic access
     let json: any
     try {
-      // Biome allows trailing commas in some cases but JSON.parse does not.
-      // However, the user asked for valid JSON validation.
+      // why: Biome tolerates trailing commas, but this validator targets strict JSON.
       json = JSON.parse(content)
     } catch (e: unknown) {
       return [`Invalid JSON: ${e instanceof Error ? e.message : String(e)}`]
@@ -81,7 +80,6 @@ export class Validator {
 
     if (!this.schema) return []
 
-    // Check top level keys
     const allowedTopLevel = Object.keys(this.schema.properties || {})
     for (const key of Object.keys(json)) {
       if (key === '$schema') continue
@@ -90,7 +88,6 @@ export class Validator {
       }
     }
 
-    // Deep check for rules
     if (json.linter?.rules) {
       const rules = json.linter.rules
       for (const category of Object.keys(rules)) {

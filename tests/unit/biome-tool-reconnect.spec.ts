@@ -4,7 +4,6 @@ import { State } from 'vscode-languageclient/node'
 import StatusBarItemHandler from '../../client/StatusBarItemHandler.js'
 import BiomeTool from '../../client/tools/biome.js'
 
-// Mock classes
 class MockOutputChannel {
   public readonly name = 'Biome'
   public readonly logLevel = LogLevel.Info
@@ -180,7 +179,6 @@ suite('BiomeTool - Auto Reconnection', () => {
     configService = new MockConfigService()
     statusBarItemHandler = new MockStatusBarItemHandler()
 
-    // Replace the internal client with our mock
     ;(biomeTool as any).client = mockClient
   })
 
@@ -197,12 +195,10 @@ suite('BiomeTool - Auto Reconnection', () => {
       binary,
     )
 
-    // Verify references stored
     strictEqual((biomeTool as any).configService, configService)
     strictEqual((biomeTool as any).outputChannel, outputChannel)
     strictEqual((biomeTool as any).statusBarItemHandler, statusBarItemHandler)
 
-    // Verify reconnection state reset
     strictEqual((biomeTool as any).isManuallyStopped, false)
     strictEqual((biomeTool as any).reconnectAttempts, 0)
     strictEqual((biomeTool as any).isReconnecting, false)
@@ -232,7 +228,6 @@ suite('BiomeTool - Auto Reconnection', () => {
       binary,
     )
 
-    // Simulate some reconnection attempts
     ;(biomeTool as any).isManuallyStopped = true
     ;(biomeTool as any).reconnectAttempts = 3
 
@@ -251,23 +246,16 @@ suite('BiomeTool - Auto Reconnection', () => {
       binary,
     )
 
-    // Verify the onStateChange handler is registered by checking internal state
     ok(
       (biomeTool as any).stateChangeDisposable,
       'State change handler should be registered',
     )
 
-    // Test the logic directly by calling onStateChange with a Running->Stopped event
-    const wasRunning = State.Running
-    const nowStopped = State.Stopped
-
-    // This should not throw and should set up reconnection
     ;(biomeTool as any).onStateChange({
-      oldState: wasRunning,
-      newState: nowStopped,
+      oldState: State.Running,
+      newState: State.Stopped,
     })
 
-    // Verify reconnection was scheduled (attempts > 0 or isReconnecting)
     const attempts = (biomeTool as any).reconnectAttempts
     const isReconnecting = (biomeTool as any).isReconnecting
     ok(attempts > 0 || isReconnecting, 'Should have initiated reconnection')
@@ -282,17 +270,14 @@ suite('BiomeTool - Auto Reconnection', () => {
       binary,
     )
 
-    // Manually stop
     ;(biomeTool as any).isManuallyStopped = true
 
-    // Simulate Running -> Stopped transition
     mockClient.state = State.Running
     mockClient.isRunningValue = true
     mockClient.stop()
 
     await new Promise((r) => setTimeout(r, 10))
 
-    // Verify no reconnection attempted
     const infoLogs = outputChannel.logs.filter((l) => l.level === 'info')
     const reconnectLogs = infoLogs.filter((l) =>
       l.message.includes('Reconnection attempt'),
@@ -313,17 +298,14 @@ suite('BiomeTool - Auto Reconnection', () => {
       binary,
     )
 
-    // Disable biome
     configService.vsCodeConfig.enableBiome = false
 
-    // Simulate Running -> Stopped transition
     mockClient.state = State.Running
     mockClient.isRunningValue = true
     mockClient.stop()
 
     await new Promise((r) => setTimeout(r, 10))
 
-    // Verify no reconnection attempted
     const infoLogs = outputChannel.logs.filter((l) => l.level === 'info')
     const reconnectLogs = infoLogs.filter((l) =>
       l.message.includes('Reconnection attempt'),
@@ -344,19 +326,16 @@ suite('BiomeTool - Auto Reconnection', () => {
       binary,
     )
 
-    // Set to max attempts
     ;(biomeTool as any).reconnectAttempts = 5
 
     await (biomeTool as any).attemptAutoReconnect()
 
-    // Verify error logged
     const errorLogs = outputChannel.logs.filter((l) => l.level === 'error')
     const maxAttemptsLog = errorLogs.find((l) =>
       l.message.includes('Max reconnection attempts reached'),
     )
     ok(maxAttemptsLog, 'Should log max attempts reached')
 
-    // Verify status bar shows "Not Activated"
     ok(statusBarItemHandler.lastUpdate, 'Should have updated status bar')
     strictEqual(statusBarItemHandler.lastUpdate!.isEnabled, false)
     strictEqual(statusBarItemHandler.lastUpdate!.text, 'Not Activated')
@@ -415,7 +394,6 @@ suite('BiomeTool - Auto Reconnection', () => {
     ;(biomeTool as any).isReconnecting = true
     ;(biomeTool as any).client = mockClient
 
-    // Directly test the queueing logic by calling the internal queue method
     const queueLengthBefore = (biomeTool as any).messageQueue.length
     ;(biomeTool as any).queueMessage(async () => {})
     strictEqual((biomeTool as any).messageQueue.length, queueLengthBefore + 1)
@@ -433,7 +411,6 @@ suite('BiomeTool - Auto Reconnection', () => {
     ;(biomeTool as any).isReconnecting = true
     ;(biomeTool as any).client = mockClient
 
-    // Directly test the queueing logic by calling the internal queue method
     const queueLengthBefore = (biomeTool as any).messageQueue.length
     ;(biomeTool as any).queueMessage(async () => {})
     strictEqual((biomeTool as any).messageQueue.length, queueLengthBefore + 1)

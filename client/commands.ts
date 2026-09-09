@@ -10,8 +10,8 @@ import {
   workspace,
 } from 'vscode'
 import type { BinarySearchResult } from './findBinary'
-import type { VSCodeConfig } from './VSCodeConfig'
 import { executeBiomeCommand } from './tools/biome-executor'
+import type { VSCodeConfig } from './VSCodeConfig'
 
 export enum BiomeCommands {
   ShowOutput = 'biome.showOutput',
@@ -84,7 +84,7 @@ export async function rageCommand(
 }
 
 /**
- * Generic function to run Biome command on the whole project.
+ * Runs a Biome command on the whole project from the active workspace.
  */
 async function runBiomeOnProject(
   binary: BinarySearchResult | undefined,
@@ -177,7 +177,6 @@ export async function openConfigCommand() {
     return
   }
 
-  // Look for biome configuration files in the current folder or above
   const configFiles = [
     'biome.json',
     'biome.jsonc',
@@ -200,7 +199,7 @@ export async function openConfigCommand() {
         await window.showTextDocument(doc)
         return
       } catch {
-        // Continue
+        // why: a missing file in this folder is the common case, keep climbing toward the workspace root.
       }
     }
     const parentPath = path.dirname(currentPath)

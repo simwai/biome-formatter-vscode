@@ -44,7 +44,6 @@ suite('Registration', () => {
     const extensionPath = path.resolve(__dirname, '../../client/extension.ts')
     const extensionContent = fs.readFileSync(extensionPath, 'utf8')
 
-    // We check for the usage of the enum member names in extension.ts
     const enumKeys = Object.keys(BiomeCommands).filter((key) =>
       Number.isNaN(Number(key)),
     )

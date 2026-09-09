@@ -19,7 +19,7 @@ const PLATFORM_BINARY = {
 function copyAllPlatformBinaries() {
   const biomePkgPath = require.resolve('@biomejs/biome/package.json')
   const biomePkgDir = path.dirname(biomePkgPath)
-  // The sibling package dir is at the same scope level as @biomejs/biome
+  // why: the cli packages are siblings of the biome package under the same scope.
   const scopeDir = path.dirname(biomePkgDir)
   const outBase = path.resolve(__dirname, '..', 'out', 'biome-bin')
 
@@ -49,7 +49,7 @@ function copyAllPlatformBinaries() {
     }
   }
 
-  // Back-compat flat copy for the current host so older lookups keep working
+  // why: older lookups expect the flat path, so keep writing it alongside the subdirs.
   const hostSuffix = PLATFORM_BINARY[process.platform]?.[process.arch]
   if (hostSuffix) {
     const parts = hostSuffix.split('/')

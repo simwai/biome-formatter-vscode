@@ -11,24 +11,24 @@ export const biomeConfigDefaultFilePattern =
 
 /**
  * This interface defines the configuration sent between the VS Code extension and the LSP.
- * Extension configuration is handled by `VSCodeConfig`.
+ * Extension configuration is handled by VSCodeConfig.
  */
 export interface BiomeWorkspaceConfigInterface {
   /**
    * biome config path
-   * `biome.configPath`
+   * biome.configPath
    */
   configPath?: string | null
 
   /**
-   * When to run the linter and generate diagnostics
-   * `biome.lint.run`
+   * When to run the linter and generate diagnostics.
+   * biome.lint.run
    */
   run?: DiagnosticPullMode
 
   /**
-   * Disable nested config files detection
-   * `biome.disableNestedConfig`
+   * Disable nested config files detection.
+   * biome.disableNestedConfig
    */
   disableNestedConfig?: boolean
 
@@ -52,23 +52,19 @@ export class WorkspaceConfig {
   public refresh(): void {
     const config = this.configuration
 
-    // Explicitly pull known settings for backwards compatibility and clarity
+    // why: explicit keys keep backwards compatibility and stay readable.
     const run =
       config.get<DiagnosticPullMode>('lint.run') || DiagnosticPullMode.onSave
     const configPath = config.get<string | null>('configPath') ?? null
     const disableNestedConfig =
       config.get<boolean>('disableNestedConfig') ?? false
 
-    // We build the config object. To be truly dynamic, we'd iterate over all 'biome.*' keys,
-    // but VS Code's getConfiguration doesn't make it easy without knowing the keys beforehand.
-    // However, the LSP client will handle the 'configuration' request which calls this.
+    // why: getConfiguration needs known keys upfront, so dynamic discovery is not possible here.
 
     this._config = {
       run,
       configPath,
       disableNestedConfig,
-      // In the future, if we add more settings to package.json, we can add them here
-      // or we can try to automate it if we have a list of all settings.
     }
   }
 
