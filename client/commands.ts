@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
 import {
@@ -62,6 +63,45 @@ export async function copyDebugCommand(
 
   await env.clipboard.writeText(debugInfoLines)
   window.showInformationMessage('Debug info copied to clipboard.')
+}
+
+/**
+ * Spawns the strict Biome configuration template into the active workspace as `biome.json`.
+ */
+export async function spawnConfigCommand(extensionUri: Uri) {
+  const workspaceFolder = workspace.workspaceFolders?.[0]
+  if (!workspaceFolder) {
+    window.showErrorMessage('No workspace folder found.')
+    return
+  }
+
+  const templatePath = Uri.joinPath(
+    extensionUri,
+    'client',
+    'strict_template.json',
+  )
+  let templateContent: string
+  try {
+    templateContent = readFileSync(templatePath.fsPath, 'utf8')
+  } catch {
+    window.showErrorMessage('Strict Biome template not found in the extension.')
+    return
+  }
+
+  const configPath = Uri.joinPath(workspaceFolder.uri, 'biome.json')
+  try {
+    await workspace.fs.writeFile(
+      configPath,
+      Buffer.from(templateContent, 'utf8'),
+    )
+    window.showInformationMessage('Spawned biome.json from strict template.')
+    const doc = await workspace.openTextDocument(configPath)
+    await window.showTextDocument(doc)
+  } catch (err) {
+    window.showErrorMessage(
+      `Failed to spawn biome.json: ${err instanceof Error ? err.message : String(err)}`,
+    )
+  }
 }
 
 export async function rageCommand(

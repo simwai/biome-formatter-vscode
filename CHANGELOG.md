@@ -1,3 +1,14 @@
+## [1.55.3] - 2026-09-15
+
+### Bug Fixes
+
+* fix spawn config command to directly create `biome.json` from strict template instead of opening picker
+
+### Features
+
+* add spawn buttons to config manager webview for direct config spawning
+* update config manager picker to show spawnable configs and templates
+
 ## [1.55.2](https://gitlab.com/simwai/biome-formatter-vscode/compare/v1.55.1...v1.55.2) (2026-07-27)
 
 

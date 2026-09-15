@@ -16,6 +16,7 @@ import {
   formatProjectCommand,
   openConfigCommand,
   rageCommand,
+  spawnConfigCommand,
 } from './commands'
 import StatusBarItemHandler from './StatusBarItemHandler'
 import BiomeTool from './tools/biome'
@@ -147,8 +148,7 @@ export async function activate(context: ExtensionContext) {
     },
     {
       id: BiomeCommands.SpawnConfig,
-      handler: () =>
-        ConfigWebview.render(context.extensionUri, configManager, 'picker'),
+      handler: () => spawnConfigCommand(context.extensionUri),
     },
     {
       id: BiomeCommands.OpenConfigManager,
