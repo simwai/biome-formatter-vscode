@@ -33,6 +33,9 @@ export enum LspCommands {
   FixAll = 'biome.fixAll',
 }
 
+/**
+ * Copies Biome debug information to the clipboard for issue reports.
+ */
 export async function copyDebugCommand(
   extensionVersion: string,
   biomeVersion: string,
@@ -45,7 +48,7 @@ export async function copyDebugCommand(
   )
   const nodeVersion = await getNodeVersion(nodeCommand)
 
-  const info = [
+  const debugInfoLines = [
     '### Used Versions',
     '',
     '',
@@ -57,13 +60,10 @@ export async function copyDebugCommand(
     '',
   ].join('\n')
 
-  await env.clipboard.writeText(info)
+  await env.clipboard.writeText(debugInfoLines)
   window.showInformationMessage('Debug info copied to clipboard.')
 }
 
-/**
- * Executes 'biome rage' and prints the output to a channel.
- */
 export async function rageCommand(
   binary: BinarySearchResult | undefined,
   outputChannel: LogOutputChannel,
@@ -83,9 +83,6 @@ export async function rageCommand(
   })
 }
 
-/**
- * Runs a Biome command on the whole project from the active workspace.
- */
 async function runBiomeOnProject(
   binary: BinarySearchResult | undefined,
   vscodeConfig: VSCodeConfig,
@@ -116,7 +113,7 @@ async function runBiomeOnProject(
 }
 
 /**
- * Executes 'biome format --write .' in the active workspace.
+ * Runs 'biome format --write .' in the active workspace folder.
  */
 export async function formatProjectCommand(
   binary: BinarySearchResult | undefined,
@@ -132,7 +129,7 @@ export async function formatProjectCommand(
 }
 
 /**
- * Executes 'biome check --write .' in the active workspace.
+ * Runs 'biome check --write .' in the active workspace folder.
  */
 export async function fixProjectCommand(
   binary: BinarySearchResult | undefined,
@@ -148,7 +145,7 @@ export async function fixProjectCommand(
 }
 
 /**
- * Executes 'biome check --write --unsafe .' in the active workspace.
+ * Runs 'biome check --write --unsafe .' in the active workspace folder.
  */
 export async function fixProjectUnsafeCommand(
   binary: BinarySearchResult | undefined,
@@ -164,7 +161,7 @@ export async function fixProjectUnsafeCommand(
 }
 
 /**
- * Opens the Biome configuration file relevant to the active editor.
+ * Opens the Biome configuration file closest to the active editor.
  */
 export async function openConfigCommand() {
   const activeEditor = window.activeTextEditor

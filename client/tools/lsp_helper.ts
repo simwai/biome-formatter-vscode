@@ -8,6 +8,9 @@ import type { BinarySearchResult } from '../findBinary'
 import type { VSCodeConfig } from '../VSCodeConfig'
 import { buildLspExecutable } from './biome-executor'
 
+/**
+ * Builds the LSP executable configuration from a resolved binary and VS Code settings.
+ */
 export function runExecutable(
   binary: BinarySearchResult,
   useExecPath: boolean = false,
@@ -43,6 +46,9 @@ export function runExecutable(
   return executable
 }
 
+/**
+ * Routes a server notification to the appropriate VS Code output channel or UI surface.
+ */
 export function onClientNotification(
   params: ShowMessageParams,
   outputChannel: LogOutputChannel,

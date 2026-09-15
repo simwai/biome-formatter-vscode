@@ -1,5 +1,8 @@
 import type { Memento } from 'vscode'
 
+/**
+ * Shape of a saved Biome configuration in the extension's global state.
+ */
 export interface CustomConfig {
   id: string
   name: string
@@ -7,6 +10,9 @@ export interface CustomConfig {
   updatedAt: number
 }
 
+/**
+ * Persists and retrieves custom Biome configurations from VS Code's global state.
+ */
 export class ConfigManager {
   private static readonly STORAGE_KEY = 'biome.customConfigs'
 

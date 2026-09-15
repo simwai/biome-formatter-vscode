@@ -17,6 +17,10 @@ import {
   WorkspaceConfig,
 } from './WorkspaceConfig'
 
+/**
+ * Central configuration service for the Biome extension.
+ * Owns VS Code settings, workspace Biome configs, and binary resolution caching.
+ */
 export class ConfigService implements IDisposable {
   public static readonly namespace = 'biome'
   private readonly _disposables: IDisposable[] = []

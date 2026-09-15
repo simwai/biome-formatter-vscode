@@ -48,6 +48,10 @@ const restartTool = async (
   }
 }
 
+/**
+ * Activates the Biome extension: wires commands, starts the language client,
+ * and registers workspace listeners.
+ */
 export async function activate(context: ExtensionContext) {
   const configManager = new ConfigManager(context.globalState)
   const configService = new ConfigService()
@@ -221,6 +225,9 @@ export async function activate(context: ExtensionContext) {
   statusBarItemHandler.show()
 }
 
+/**
+ * Deactivates the Biome extension and stops all registered tools.
+ */
 export async function deactivate(): Promise<void> {
   await Promise.all(tools.map((tool) => tool.deactivate()))
 }

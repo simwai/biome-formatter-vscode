@@ -140,30 +140,9 @@ type TraceLevel = 'off' | 'messages' | 'verbose'
  * Mirrors contributes.configuration in package.json.
  */
 interface VSCodeConfigInterface {
-  /**
-   * biome.enable
-   * @default true
-   */
   enableBiome: boolean
-  /**
-   * Trace communication between VSCode and the Biome language server.
-   * biome.trace.server
-   *
-   * @default 'off'
-   */
   trace: TraceLevel
-  /**
-   * Path to the biome binary.
-   * biome.path.biome
-   * @default undefined
-   */
   binPathBiome: string | undefined
-
-  /**
-   * Path to a JavaScript runtime binary (Node.js, bun, or deno).
-   * biome.path.node
-   * @default undefined
-   */
   nodePath: string | undefined
 
   /**
@@ -172,16 +151,6 @@ interface VSCodeConfigInterface {
    */
   useExecPath: boolean
 
-  /**
-   * Start the language server only when a biome.json file exists in one of the workspaces.
-   * biome.requireConfig
-   * @default true
-   */
   requireConfig: boolean
-
-  /**
-   * The languages that Biome should be enabled for.
-   * biome.enabledLanguages
-   */
   enabledLanguages: string[]
 }

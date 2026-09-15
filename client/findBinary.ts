@@ -36,7 +36,6 @@ export function validateSafeBinaryPath(binaryPath: string): boolean {
   return true
 }
 
-/** @internal only used for testing */
 export function replaceTargetFromMainToBin(
   resolvedPath: string,
   binaryName: string,
@@ -95,10 +94,6 @@ async function searchNodeModulesDefaultBinPath(
   return { path: candidates[firstExistingCandidateIndex], loader: 'native' }
 }
 
-/**
- * Returns node_modules paths derived from all package.json files found in the workspace.
- * The result is cached after the first call to avoid repeated file system scans.
- */
 let cachedWorkspacePackageJsonNodeModules: Promise<string[]> | undefined
 function getWorkspacePackageJsonNodeModules(): Promise<string[]> {
   if (!cachedWorkspacePackageJsonNodeModules) {
@@ -115,7 +110,6 @@ function getWorkspacePackageJsonNodeModules(): Promise<string[]> {
   return cachedWorkspacePackageJsonNodeModules
 }
 
-/** @internal only used for clearing test states */
 export function clearWorkspacePackageJsonNodeModulesCache(): void {
   cachedWorkspacePackageJsonNodeModules = undefined
 }
@@ -130,22 +124,22 @@ export async function searchProjectNodeModulesBin(
   const workspaceNodeModules = (workspace.workspaceFolders ?? []).map(
     (folder) => path.join(folder.uri.fsPath, 'node_modules'),
   )
-  const result = await searchNodeModulesDefaultBinPath(
+  const projectBinResult = await searchNodeModulesDefaultBinPath(
     binaryName,
     workspaceNodeModules,
   )
-  if (result) {
-    return result
+  if (projectBinResult) {
+    return projectBinResult
   }
 
   // why: monorepo packages keep their own node_modules below the workspace root.
   const packageJsonNodeModules = await getWorkspacePackageJsonNodeModules()
-  const result2 = await searchNodeModulesDefaultBinPath(
+  const workspacePackageBinResult = await searchNodeModulesDefaultBinPath(
     binaryName,
     packageJsonNodeModules,
   )
-  if (result2) {
-    return result2
+  if (workspacePackageBinResult) {
+    return workspacePackageBinResult
   }
 
   // why: the direct lookup is the last local option before giving up on project binaries.
@@ -241,10 +235,6 @@ export async function searchYarnPnpBin(
   return results.find(Boolean)
 }
 
-/**
- * Searches for the binary in the global package directories.
- * Returns undefined when nothing is found.
- */
 export async function searchGlobalNodeModulesBin(
   binaryName: string,
 ): Promise<BinarySearchResult | undefined> {
@@ -265,10 +255,6 @@ export async function searchGlobalNodeModulesBin(
   } catch {}
 }
 
-/**
- * Searches for the binary on the system PATH.
- * Returns undefined when nothing is found.
- */
 export async function searchEnvPath(
   defaultBinaryName: string,
 ): Promise<BinarySearchResult | undefined> {
@@ -364,8 +350,6 @@ export async function searchSettingsBin(
   return undefined
 }
 
-// adapted from the global-modules locator in the official Biome extension:
-// https://github.com/biomejs/biome-vscode/blob/ae9b6df2254d0ff8ee9d626554251600eb2ca118/src/locator.ts#L28-L49
 function globalNodeModulesPaths(): string[] {
   const npmGlobalNodeModulesPath = safeSpawnSync('npm', ['root', '-g'])
   const pnpmGlobalNodeModulesPath = safeSpawnSync('pnpm', ['root', '-g'])
@@ -431,9 +415,6 @@ export async function searchBundledBiomeBin(): Promise<
   return undefined
 }
 
-/**
- * Searches for the binary in the extension's own dependencies as a final fallback.
- */
 export async function searchExtensionNodeModulesBin(
   binaryName: string,
 ): Promise<BinarySearchResult | undefined> {
@@ -508,7 +489,6 @@ export async function findExecutableBinary(
   return undefined
 }
 
-/** @internal only used for clearing test states */
 export function clearFindExecutableBinaryCache(): void {
   clearWorkspacePackageJsonNodeModulesCache()
 }

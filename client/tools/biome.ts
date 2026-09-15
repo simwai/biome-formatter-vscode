@@ -26,6 +26,10 @@ import type ToolInterface from './ToolInterface'
 
 const languageClientName = 'biome'
 
+/**
+ * Biome LSP tool implementation. Manages the language client lifecycle,
+ * reconnection, and status-bar state for the Biome language server.
+ */
 export default class BiomeTool implements ToolInterface {
   private client: LanguageClient | undefined
   private disposeResources: (() => Promise<void>) | undefined
@@ -381,14 +385,14 @@ export default class BiomeTool implements ToolInterface {
     const enable = configService.vsCodeConfig.enableBiome
     const isEnabled = (this.client?.isRunning() ?? false) && enable
 
-    let text =
+    let statusBarTooltipText =
       `[$(terminal) Open Output](command:${BiomeCommands.ShowOutput})\n\n` +
       `[$(refresh) Restart Server](command:${BiomeCommands.Restart})\n\n`
 
     if (enable) {
-      text += `[$(stop) Stop Server](command:${BiomeCommands.ToggleEnabled})\n\n`
+      statusBarTooltipText += `[$(stop) Stop Server](command:${BiomeCommands.ToggleEnabled})\n\n`
     } else {
-      text += `[$(play) Start Server](command:${BiomeCommands.ToggleEnabled})\n\n`
+      statusBarTooltipText += `[$(play) Start Server](command:${BiomeCommands.ToggleEnabled})\n\n`
     }
 
     const activeEditor = window.activeTextEditor
@@ -402,7 +406,7 @@ export default class BiomeTool implements ToolInterface {
     statusBarItemHandler.updateTool(
       'biome',
       isEnabled,
-      text,
+      statusBarTooltipText,
       this.client?.initializeResult?.serverInfo?.version,
       isFileActive,
     )

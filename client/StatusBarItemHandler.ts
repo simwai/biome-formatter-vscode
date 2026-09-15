@@ -13,6 +13,9 @@ type ToolState = {
   isFileActive?: boolean
 }
 
+/**
+ * Renders and updates the Biome status bar item, including tooltip and icon state.
+ */
 export default class StatusBarItemHandler {
   private biomeState: ToolState = {
     isEnabled: false,

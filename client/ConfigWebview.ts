@@ -4,6 +4,9 @@ import * as vscode from 'vscode'
 import type { ConfigManager, CustomConfig } from './ConfigManager'
 import { Validator } from './Validator'
 
+/**
+ * Manages the Biome configuration editor webview panel.
+ */
 export class ConfigWebview {
   public static currentPanel: ConfigWebview | undefined
   private readonly _panel: vscode.WebviewPanel

@@ -14,22 +14,10 @@ export const biomeConfigDefaultFilePattern =
  * Extension configuration is handled by VSCodeConfig.
  */
 export interface BiomeWorkspaceConfigInterface {
-  /**
-   * biome config path
-   * biome.configPath
-   */
   configPath?: string | null
 
-  /**
-   * When to run the linter and generate diagnostics.
-   * biome.lint.run
-   */
   run?: DiagnosticPullMode
 
-  /**
-   * Disable nested config files detection.
-   * biome.disableNestedConfig
-   */
   disableNestedConfig?: boolean
 
   /**
