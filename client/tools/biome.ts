@@ -412,6 +412,26 @@ export default class BiomeTool implements ToolInterface {
     )
   }
 
+  async maybeStartServerIfConfigCreated(
+    outputChannel: LogOutputChannel,
+    configService: ConfigService,
+    statusBarItemHandler: StatusBarItemHandler,
+  ): Promise<void> {
+    if (!this.client || this.client.isRunning()) {
+      return
+    }
+
+    if (!configService.vsCodeConfig.enableBiome) {
+      return
+    }
+
+    if (await this.shouldStartServer(configService)) {
+      outputChannel.info('Biome configuration file detected, starting server.')
+      await this.client.start()
+      this.updateStatusBar(statusBarItemHandler, configService)
+    }
+  }
+
   private async shouldStartServer(
     configService: ConfigService,
   ): Promise<boolean> {

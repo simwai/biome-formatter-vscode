@@ -20,6 +20,7 @@ import {
 import StatusBarItemHandler from './StatusBarItemHandler'
 import BiomeTool from './tools/biome'
 import type ToolInterface from './tools/ToolInterface'
+import { biomeConfigDefaultFilePattern } from './WorkspaceConfig'
 
 const outputChannelName = 'Biome'
 const tools: ToolInterface[] = []
@@ -174,12 +175,25 @@ export async function activate(context: ExtensionContext) {
     biomeTool.updateStatusBar(statusBarItemHandler, configService)
   })
 
+  const biomeConfigWatcherDispose = workspace.createFileSystemWatcher(
+    biomeConfigDefaultFilePattern,
+  )
+
+  biomeConfigWatcherDispose.onDidCreate(async () => {
+    await biomeTool.maybeStartServerIfConfigCreated(
+      outputChannel,
+      configService,
+      statusBarItemHandler,
+    )
+  })
+
   context.subscriptions.push(
     ...commandDisposables,
     configService,
     outputChannel,
     onDidChangeWorkspaceFoldersDispose,
     onActiveEditorChangeDispose,
+    biomeConfigWatcherDispose,
     statusBarItemHandler,
   )
 
