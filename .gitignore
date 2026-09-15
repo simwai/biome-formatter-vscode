@@ -1,4 +1,4 @@
-# Dependencies
+﻿# Dependencies
 node_modules/
 
 # Build outputs
@@ -23,3 +23,5 @@ vscode_docs/target/
 # Misc
 .env
 *.old
+.session-locks/
+.playwright-mcp/

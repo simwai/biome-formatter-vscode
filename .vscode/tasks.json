@@ -3,13 +3,6 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "dev",
-      "group": "build",
-      "problemMatcher": ["$tsc"],
-      "label": "pnpm: dev"
-    },
-    {
-      "type": "npm",
       "script": "watch",
       "group": "build",
       "problemMatcher": ["$tsc-watch"],
