@@ -5,7 +5,6 @@ import { WORKSPACE_FOLDER } from '../test-helpers.js'
 
 const keys = ['lint.run', 'configPath', 'disableNestedConfig']
 
-// biome-ignore lint/style/noNonNullAssertion: tests always open tests/unit per .vscode-test.mjs workspaceFolder
 const FOLDER = WORKSPACE_FOLDER!
 
 suite('WorkspaceConfig', () => {

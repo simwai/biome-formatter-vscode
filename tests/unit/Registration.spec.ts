@@ -8,7 +8,6 @@ suite('Registration', () => {
     const packageJsonPath = path.resolve(__dirname, '../../package.json')
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
     const contributedCommands = packageJson.contributes.commands.map(
-      // biome-ignore lint/suspicious/noExplicitAny: package.json structure is dynamic
       (c: any) => c.command,
     )
 
@@ -26,7 +25,6 @@ suite('Registration', () => {
     const packageJsonPath = path.resolve(__dirname, '../../package.json')
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
     const contributedCommands = packageJson.contributes.commands.map(
-      // biome-ignore lint/suspicious/noExplicitAny: package.json structure is dynamic
       (c: any) => c.command,
     )
 

@@ -62,7 +62,6 @@ export async function sleep(ms: number): Promise<void> {
 }
 
 export async function activateExtension(full: boolean = true): Promise<void> {
-  // biome-ignore lint/style/noNonNullAssertion: extension must be available in test context
   const ext = extensions.getExtension('simwai.biome-vscode')!
   if (!ext.isActive) {
     await ext.activate()

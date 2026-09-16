@@ -337,8 +337,8 @@ suite('BiomeTool - Auto Reconnection', () => {
     ok(maxAttemptsLog, 'Should log max attempts reached')
 
     ok(statusBarItemHandler.lastUpdate, 'Should have updated status bar')
-    strictEqual(statusBarItemHandler.lastUpdate!.isEnabled, false)
-    strictEqual(statusBarItemHandler.lastUpdate!.text, 'Not Activated')
+    strictEqual(statusBarItemHandler.lastUpdate?.isEnabled, false)
+    strictEqual(statusBarItemHandler.lastUpdate?.text, 'Not Activated')
   })
 
   test('queueMessage() and flushQueue() work correctly', async () => {
